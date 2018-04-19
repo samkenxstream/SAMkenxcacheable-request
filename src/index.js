@@ -2,6 +2,8 @@
 
 const EventEmitter = require('events');
 const urlLib = require('url');
+const crypto = require('crypto');
+const Readable = require('stream').Readable;
 const normalizeUrl = require('normalize-url');
 const getStream = require('get-stream');
 const CachePolicy = require('http-cache-semantics');
@@ -41,7 +43,21 @@ class CacheableRequest {
 
 			const ee = new EventEmitter();
 			const url = normalizeUrl(urlLib.format(opts));
-			const key = `${opts.method}:${url}`;
+			let key = `${opts.method}:${url}`;
+
+			// POST, PATCH, and PUT requests may be cached, depending on the response
+			// cache-control headers. As a result, the body of the request should be
+			// added to the cache key in order to avoid collisions.
+			if (opts.body && ['POST', 'PATCH', 'PUT'].indexOf(opts.method) !== -1) {
+				if (opts.body instanceof Readable) {
+					// Streamed bodies should completely skip the cache because they may
+					// or may not be hashable and in either case the stream would need to
+					// close before the cache key could be generated.
+					opts.cache = false;
+				} else {
+					key += `:${crypto.createHash('md5').update(opts.body).digest('hex')}`;
+				}
+			}
 			let revalidate = false;
 			let madeRequest = false;
 

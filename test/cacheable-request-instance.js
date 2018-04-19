@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import { request } from 'http';
+import { PassThrough } from 'stream';
 import url from 'url';
 import test from 'ava';
 import createTestServer from 'create-test-server';
@@ -11,6 +12,7 @@ let s;
 test.before('setup', async () => {
 	s = await createTestServer();
 	s.get('/', (req, res) => res.end('hi'));
+	s.post('/', (req, res) => res.status(201).end('hello'));
 });
 
 test('cacheableRequest is a function', t => {
@@ -218,6 +220,47 @@ test.cb('cacheableRequest makes request even if current DB connection fails (whe
 	})
 		.on('error', () => {})
 		.on('request', req => req.end());
+});
+
+test.cb('cacheableRequest hashes request body as cache key', t => {
+	const cache = {
+		get(k) {
+			t.is(k.split(':').pop(), '5d41402abc4b2a76b9719d911017c592');
+		},
+		set() {},
+		delete() {}
+	};
+	const cacheableRequest = new CacheableRequest(request, cache);
+	const opts = url.parse(s.url);
+	opts.body = 'hello';
+	opts.method = 'POST';
+	cacheableRequest(opts, res => {
+		t.is(res.statusCode, 201);
+		t.end();
+	})
+		.on('error', () => {})
+		.on('request', req => req.end());
+});
+
+test.cb('cacheableRequest skips cache for streamed body', t => {
+	const cache = {
+		get() {
+			t.fail();
+		},
+		set() {},
+		delete() {}
+	};
+	const cacheableRequest = new CacheableRequest(request, cache);
+	const opts = url.parse(s.url);
+	opts.body = new PassThrough();
+	opts.method = 'POST';
+	cacheableRequest(opts, res => {
+		t.is(res.statusCode, 201);
+		t.end();
+	})
+		.on('error', () => {})
+		.on('request', req => req.end());
+	opts.body.end('hello');
 });
 
 test.after('cleanup', async () => {
