@@ -16,11 +16,15 @@ class CacheableRequest {
 			throw new TypeError('Parameter `request` must be a function');
 		}
 
-		this.cache = new Keyv({
-			uri: typeof cacheAdapter === 'string' && cacheAdapter,
-			store: typeof cacheAdapter !== 'string' && cacheAdapter,
-			namespace: 'cacheable-request'
-		});
+		if (cacheAdapter instanceof Keyv) {
+			this.cache = cacheAdapter;
+		} else {
+			this.cache = new Keyv({
+				uri: typeof cacheAdapter === 'string' && cacheAdapter,
+				store: typeof cacheAdapter !== 'string' && cacheAdapter,
+				namespace: 'cacheable-request'
+			});
+		}
 
 		return this.createCacheableRequest(request);
 	}
