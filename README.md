@@ -2,8 +2,8 @@
 
 > Wrap native HTTP requests with RFC compliant cache support
 
-[![Build Status](https://travis-ci.org/lukechilds/cacheable-request.svg?branch=master)](https://travis-ci.org/lukechilds/cacheable-request)
-[![Coverage Status](https://coveralls.io/repos/github/lukechilds/cacheable-request/badge.svg?branch=master)](https://coveralls.io/github/lukechilds/cacheable-request?branch=master)
+[![tests](https://github.com/jaredwray/cacheable-request/actions/workflows/tests.yaml/badge.svg)](https://github.com/jaredwray/cacheable-request/actions/workflows/tests.yaml)
+[![codecov](https://codecov.io/gh/jaredwray/cacheable-request/branch/master/graph/badge.svg?token=LDLaqe4PsI)](https://codecov.io/gh/jaredwray/cacheable-request)
 [![npm](https://img.shields.io/npm/dm/cacheable-request.svg)](https://www.npmjs.com/package/cacheable-request)
 [![npm](https://img.shields.io/npm/v/cacheable-request.svg)](https://www.npmjs.com/package/cacheable-request)
 
