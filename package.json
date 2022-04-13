@@ -41,7 +41,7 @@
 		"@keyv/sqlite": "^2.0.0",
 		"ava": "^1.1.0",
 		"create-test-server": "3.0.0",
-		"delay": "^4.0.0",
+		"delay": "^5.0.0",
 		"eslint-config-xo-lukechilds": "^1.0.1",
 		"nyc": "^15.1.0",
 		"pify": "^4.0.0",
