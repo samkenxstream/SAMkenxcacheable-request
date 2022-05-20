@@ -15,7 +15,7 @@ test.before('setup', async () => {
 		res.setHeader('cache-control', 'max-age=60');
 		res.end('hi');
 	});
-  s.post('/', (req, res) => res.status(201).end('hello'));
+	s.post('/', (req, res) => res.status(201).end('hello'));
 });
 
 test('cacheableRequest is a function', t => {

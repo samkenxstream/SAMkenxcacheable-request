@@ -3,7 +3,7 @@
 const EventEmitter = require('events');
 const urlLib = require('url');
 const crypto = require('crypto');
-const Readable = require('stream').Readable;
+const { Readable } = require('stream');
 const normalizeUrl = require('normalize-url');
 const getStream = require('get-stream');
 const CachePolicy = require('http-cache-semantics');
@@ -69,9 +69,9 @@ class CacheableRequest {
 					stripAuthentication: false
 				}
 			);
-			const key = `${opts.method}:${normalizedUrlString}`;
-      
-      // POST, PATCH, and PUT requests may be cached, depending on the response
+			let key = `${opts.method}:${normalizedUrlString}`;
+
+			// POST, PATCH, and PUT requests may be cached, depending on the response
 			// cache-control headers. As a result, the body of the request should be
 			// added to the cache key in order to avoid collisions.
 			if (opts.body && ['POST', 'PATCH', 'PUT'].indexOf(opts.method) !== -1) {
