@@ -8,6 +8,7 @@ import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import pify from 'pify';
 import CacheableRequest from 'this';
+import Keyv from 'keyv';
 
 let s;
 
@@ -539,6 +540,16 @@ test('Undefined callback parameter inside cache logic is handled', async t => {
 	cacheableRequest(s.url + endpoint);
 	await delay(500);
 	t.pass();
+});
+
+test('Custom Keyv instance adapters used', async t => {
+	const cache = new Keyv();
+	const endpoint = '/cache';
+	const cacheableRequest = new CacheableRequest(request, cache);
+	const cacheableRequestHelper = promisify(cacheableRequest);
+	const response = await cacheableRequestHelper(s.url + endpoint);
+	const cached = await cache.get(`GET:${s.url + endpoint}`);
+	t.is(response.body, cached.body.toString());
 });
 
 test('Keyv cache adapters load via connection uri', async t => {
