@@ -1,5 +1,6 @@
 import { request } from 'http';
 import test from 'ava';
+import Keyv from 'keyv';
 import CacheableRequest from 'this';
 
 test('CacheableRequest is a function', t => {
@@ -16,4 +17,8 @@ test('CacheableRequest throws TypeError if request fn isn\'t passed in', t => {
 		new CacheableRequest(); // eslint-disable-line no-new
 	}, TypeError);
 	t.is(error.message, 'Parameter `request` must be a function');
+});
+
+test('CacheableRequest accepts Keyv instance', t => {
+	t.notThrows(() => new CacheableRequest(request, new Keyv()));
 });
