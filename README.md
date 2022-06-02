@@ -20,7 +20,7 @@
 - Updates `Age` header on cached responses
 - Can completely bypass cache on a per request basis
 - In memory cache by default
-- Official support for Redis, MongoDB, SQLite, PostgreSQL and MySQL storage adapters
+- Official support for Redis, Memcache, Etcd, MongoDB, SQLite, PostgreSQL and MySQL storage adapters
 - Easily plug in your own or third-party storage adapters
 - If DB connection fails, cache is automatically bypassed ([disabled by default](#optsautomaticfailover))
 - Adds cache support to any existing HTTP code with minimal changes
@@ -55,7 +55,7 @@ const cacheableRequest = new CacheableRequest(electron.net);
 
 ## Storage Adapters
 
-`cacheable-request` uses [Keyv](https://github.com/lukechilds/keyv) to support a wide range of storage adapters.
+`cacheable-request` uses [Keyv](https://github.com/jaredwray/keyv) to support a wide range of storage adapters.
 
 For example, to use Redis as a cache backend, you just need to install the official Redis Keyv storage adapter:
 
@@ -69,7 +69,7 @@ And then you can pass `CacheableRequest` your connection string:
 const cacheableRequest = new CacheableRequest(http.request, 'redis://user:pass@localhost:6379');
 ```
 
-[View all official Keyv storage adapters.](https://github.com/lukechilds/keyv#official-storage-adapters)
+[View all official Keyv storage adapters.](https://github.com/jaredwray/keyv#official-storage-adapters)
 
 Keyv also supports anything that follows the Map API so it's easy to write your own storage adapter or use a third-party solution.
 
@@ -86,7 +86,7 @@ const storageAdapter = new QuickLRU({ maxSize: 1000 });
 const cacheableRequest = new CacheableRequest(http.request, storageAdapter);
 ```
 
-View the [Keyv docs](https://github.com/lukechilds/keyv) for more information on how to use storage adapters.
+View the [Keyv docs](https://github.com/jaredwray/keyv) for more information on how to use storage adapters.
 
 ## API
 
@@ -105,7 +105,7 @@ Request function to wrap with cache support. Should be [`http.request`](https://
 Type: `Keyv storage adapter`<br>
 Default: `new Map()`
 
-A [Keyv](https://github.com/lukechilds/keyv) storage adapter instance, or connection string if using with an official Keyv storage adapter.
+A [Keyv](https://github.com/jaredwray/keyv) storage adapter instance, or connection string if using with an official Keyv storage adapter.
 
 ### Instance
 
@@ -203,4 +203,5 @@ cacheableRequest('example.com', cb)
 
 ## License
 
-MIT © Luke Childs
+MIT © Luke Childs 2017-2021
+MIT © Jared Wray 2022

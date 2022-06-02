@@ -3,8 +3,8 @@
 	"version": "7.0.2",
 	"description": "Wrap native HTTP requests with RFC compliant cache support",
 	"license": "MIT",
-	"repository": "lukechilds/cacheable-request",
-	"author": "Luke Childs <lukechilds123@gmail.com> (http://lukechilds.co.uk)",
+	"repository": "jaredwray/cacheable-request",
+	"author": "Jared Wray <me@jaredwray.com> (http://jaredwray.com)",
 	"main": "src/index.js",
 	"engines": {
 		"node": ">=8"
