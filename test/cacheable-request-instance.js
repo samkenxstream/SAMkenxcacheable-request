@@ -2,11 +2,11 @@ const EventEmitter = require('events');
 const { request } = require('http');
 const { PassThrough } = require('stream');
 const url = require('url');
+const { promisify } = require('util');
 const test = require('ava');
 const createTestServer = require('create-test-server');
 const getStream = require('get-stream');
 const CacheableRequest = require('this');
-const {promisify} = require('util');
 
 let s;
 
@@ -240,34 +240,33 @@ test('cacheableRequest does not cache response if request is aborted after recei
 	/* eslint-disable max-nested-callbacks */
 	// eslint-disable-next-line promise/prefer-await-to-then
 	createTestServer().then(s => {
-	s.get('/delay-partial', (req, res) => {
-		res.setHeader('cache-control', 'max-age=60');
-		res.write('h');
-		setTimeout(() => {
-			res.end('i');
-		}, 50);
-	});
-
-	const cacheableRequest = new CacheableRequest(request);
-	const opts = url.parse(s.url);
-	opts.path = '/delay-partial';
-	cacheableRequest(opts)
-		.on('request', req => {
-
+		s.get('/delay-partial', (req, res) => {
+			res.setHeader('cache-control', 'max-age=60');
+			res.write('h');
 			setTimeout(() => {
-				req.abort();
-			}, 20);
-
-			setTimeout(() => {
-				cacheableRequest(opts, async response => {
-					t.is(response.fromCache, false);
-
-					const body = await getStream(response);
-					t.is(body, 'hi');
-					end();
-				}).on('request', req => req.end());
-			}, 100);
+				res.end('i');
+			}, 50);
 		});
+
+		const cacheableRequest = new CacheableRequest(request);
+		const opts = url.parse(s.url);
+		opts.path = '/delay-partial';
+		cacheableRequest(opts)
+			.on('request', req => {
+				setTimeout(() => {
+					req.abort();
+				}, 20);
+
+				setTimeout(() => {
+					cacheableRequest(opts, async response => {
+						t.is(response.fromCache, false);
+
+						const body = await getStream(response);
+						t.is(body, 'hi');
+						end();
+					}).on('request', req => req.end());
+				}, 100);
+			});
 	});
 	/* eslint-enable max-nested-callbacks */
 }));
