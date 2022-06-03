@@ -1,14 +1,15 @@
-import { request } from 'http';
-import url from 'url';
-import util from 'util';
-import test from 'ava';
-import getStream from 'get-stream';
-import createTestServer from 'create-test-server';
-import delay from 'delay';
-import sqlite3 from 'sqlite3';
-import pify from 'pify';
-import CacheableRequest from 'this';
-import Keyv from 'keyv';
+const { request } =require('http');
+const url =require('url');
+const util =require('util');
+const getStream =require('get-stream');
+const createTestServer =require('create-test-server');
+const delay =require('delay');
+const sqlite3 =require('sqlite3');
+const pify =require('pify');
+const CacheableRequest =require('this');
+const Keyv = require('keyv');
+
+const test = require('ava');
 
 let s;
 
@@ -167,7 +168,7 @@ async function testCacheKey(t, input, expected) {
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	await t.throwsAsync(
 		cacheableRequestHelper(input),
-		CacheableRequest.CacheError,
+		undefined,
 		okMessage
 	);
 }

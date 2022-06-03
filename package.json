@@ -10,7 +10,7 @@
 		"node": ">=8"
 	},
 	"scripts": {
-		"test": "xo && nyc ava",
+		"test": "nyc ava",
 		"coverage": "nyc report --reporter=text-lcov > coverage.lcov",
 		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf coverage.lcov && rm -rf ./test/testdb.sqlite"
 	},
@@ -31,7 +31,7 @@
 	],
 	"dependencies": {
 		"clone-response": "^1.0.2",
-		"get-stream": "^5.1.0",
+		"get-stream": "^6.0.1",
 		"http-cache-semantics": "^4.1.0",
 		"keyv": "^4.3.0",
 		"lowercase-keys": "^2.0.0",
@@ -40,7 +40,7 @@
 	},
 	"devDependencies": {
 		"@keyv/sqlite": "^3.5.2",
-		"ava": "^1.1.0",
+		"ava": "^4.2.0",
 		"create-test-server": "3.0.1",
 		"delay": "^5.0.0",
 		"eslint-config-xo-lukechilds": "^1.0.1",
