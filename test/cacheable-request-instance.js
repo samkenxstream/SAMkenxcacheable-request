@@ -239,41 +239,36 @@ test('cacheableRequest does not cache response if request is aborted before rece
 test('cacheableRequest does not cache response if request is aborted after receiving part of the response', withCallback((t, end) => {
 	/* eslint-disable max-nested-callbacks */
 	// eslint-disable-next-line promise/prefer-await-to-then
-	try {
-		createTestServer().then(s => {
-		s.get('/delay-partial', (req, res) => {
-			res.setHeader('cache-control', 'max-age=60');
-			res.write('h');
+	createTestServer().then(s => {
+	s.get('/delay-partial', (req, res) => {
+		res.setHeader('cache-control', 'max-age=60');
+		res.write('h');
+		setTimeout(() => {
+			res.end('i');
+		}, 50);
+	});
+
+	const cacheableRequest = new CacheableRequest(request);
+	const opts = url.parse(s.url);
+	opts.path = '/delay-partial';
+	cacheableRequest(opts)
+		.on('request', req => {
+
 			setTimeout(() => {
-				res.end('i');
-			}, 50);
+				req.abort();
+			}, 20);
+
+			setTimeout(() => {
+				cacheableRequest(opts, async response => {
+					t.is(response.fromCache, false);
+
+					const body = await getStream(response);
+					t.is(body, 'hi');
+					end();
+				}).on('request', req => req.end());
+			}, 100);
 		});
-
-		const cacheableRequest = new CacheableRequest(request);
-		const opts = url.parse(s.url);
-		opts.path = '/delay-partial';
-		cacheableRequest(opts)
-			.on('request', req => {
-				req.end();
-
-				setTimeout(() => {
-					req.abort();
-				}, 20);
-
-				setTimeout(() => {
-					cacheableRequest(opts, async response => {
-						t.is(response.fromCache, false);
-
-						const body = await getStream(response);
-						t.is(body, 'hi');
-						end();
-					}).on('request', req => req.end());
-				}, 100);
-			});
-		});
-	} catch (e) {
-		console.log(e);
-	}
+	});
 	/* eslint-enable max-nested-callbacks */
 }));
 
