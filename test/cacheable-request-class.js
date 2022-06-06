@@ -1,5 +1,5 @@
 const { request } = require('http');
-const test = require('ava');
+const test = require('ava'); // eslint-disable-line import/no-unresolved
 const Keyv = require('keyv');
 const CacheableRequest = require('this');
 

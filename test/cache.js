@@ -1,15 +1,15 @@
-const { request } =require('http');
-const url =require('url');
-const util =require('util');
-const getStream =require('get-stream');
-const createTestServer =require('create-test-server');
-const delay =require('delay');
-const sqlite3 =require('sqlite3');
-const pify =require('pify');
-const CacheableRequest =require('this');
+const { request } = require('http');
+const url = require('url');
+const util = require('util');
+const getStream = require('get-stream');
+const createTestServer = require('create-test-server');
+const delay = require('delay');
+const sqlite3 = require('sqlite3');
+const pify = require('pify');
+const CacheableRequest = require('this');
 const Keyv = require('keyv');
 
-const test = require('ava');
+const test = require('ava'); // eslint-disable-line import/no-unresolved
 
 let s;
 
