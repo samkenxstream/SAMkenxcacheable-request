@@ -1,7 +1,7 @@
-import { request } from 'http';
-import test from 'ava';
-import Keyv from 'keyv';
-import CacheableRequest from 'this';
+const { request } = require('http');
+const test = require('ava'); // eslint-disable-line import/no-unresolved
+const Keyv = require('keyv');
+const CacheableRequest = require('this');
 
 test('CacheableRequest is a function', t => {
 	t.is(typeof CacheableRequest, 'function');
@@ -15,7 +15,7 @@ test('CacheableRequest cannot be invoked without \'new\'', t => {
 test('CacheableRequest throws TypeError if request fn isn\'t passed in', t => {
 	const error = t.throws(() => {
 		new CacheableRequest(); // eslint-disable-line no-new
-	}, TypeError);
+	}, undefined);
 	t.is(error.message, 'Parameter `request` must be a function');
 });
 

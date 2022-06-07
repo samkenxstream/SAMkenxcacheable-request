@@ -132,10 +132,6 @@ class CacheableRequest {
 									new Promise(resolve => response.once('end', resolve))
 								]);
 
-								if (requestErrored) {
-									return;
-								}
-
 								const body = await bodyPromise;
 
 								const value = {

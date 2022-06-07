@@ -76,3 +76,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Visual Studio folder
+.vscode
