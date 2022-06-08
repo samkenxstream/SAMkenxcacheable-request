@@ -1,6 +1,8 @@
+/* eslint-disable unicorn/prefer-module */
+/* eslint-disable node/no-deprecated-api */
 const { request } = require('http');
 const url = require('url');
-const util = require('util');
+const util = require('util'); // eslint-disable-line unicorn/import-style
 const getStream = require('get-stream');
 const createTestServer = require('create-test-server');
 const delay = require('delay');
@@ -9,13 +11,13 @@ const pify = require('pify');
 const CacheableRequest = require('this');
 const Keyv = require('keyv');
 
-const test = require('ava'); // eslint-disable-line import/no-unresolved
+const test = require('ava');
 
 let s;
 
 // Promisify cacheableRequest
-const promisify = cacheableRequest => opts => new Promise((resolve, reject) => {
-	cacheableRequest(opts, async response => {
+const promisify = cacheableRequest => options => new Promise((resolve, reject) => {
+	cacheableRequest(options, async response => {
 		const body = await getStream(response);
 		response.body = body;
 
@@ -24,7 +26,7 @@ const promisify = cacheableRequest => opts => new Promise((resolve, reject) => {
 
 		resolve(response);
 	})
-		.on('request', req => req.end())
+		.on('request', request_ => request_.end())
 		.once('error', reject);
 });
 
@@ -32,88 +34,92 @@ test.before('setup', async () => {
 	s = await createTestServer();
 
 	let noStoreIndex = 0;
-	s.get('/no-store', (req, res) => {
+	s.get('/no-store', (request_, response_) => {
 		noStoreIndex++;
-		res.setHeader('Cache-Control', 'public, no-cache, no-store');
-		res.end(noStoreIndex.toString());
+		response_.setHeader('Cache-Control', 'public, no-cache, no-store');
+		response_.end(noStoreIndex.toString());
 	});
 
 	let cacheIndex = 0;
-	s.get('/cache', (req, res) => {
+	s.get('/cache', (request_, response_) => {
 		cacheIndex++;
-		res.setHeader('Cache-Control', 'public, max-age=60');
-		res.end(cacheIndex.toString());
+		response_.setHeader('Cache-Control', 'public, max-age=60');
+		response_.end(cacheIndex.toString());
 	});
 
-	s.get('/last-modified', (req, res) => {
-		res.setHeader('Cache-Control', 'public, max-age=0');
-		res.setHeader('Last-Modified', 'Wed, 21 Oct 2015 07:28:00 GMT');
+	s.get('/last-modified', (request_, response_) => {
+		response_.setHeader('Cache-Control', 'public, max-age=0');
+		response_.setHeader('Last-Modified', 'Wed, 21 Oct 2015 07:28:00 GMT');
 		let responseBody = 'last-modified';
 
-		if (req.headers['if-modified-since'] === 'Wed, 21 Oct 2015 07:28:00 GMT') {
-			res.statusCode = 304;
+		if (request_.headers['if-modified-since'] === 'Wed, 21 Oct 2015 07:28:00 GMT') {
+			response_.statusCode = 304;
 			responseBody = null;
 		}
 
-		res.end(responseBody);
+		response_.end(responseBody);
 	});
 
 	let calledFirstError = false;
-	s.get('/first-error', (req, res) => {
+	s.get('/first-error', (request_, response_) => {
 		if (calledFirstError) {
-			res.end('ok');
+			response_.end('ok');
 			return;
 		}
 
 		calledFirstError = true;
-		res.statusCode = 502;
-		res.end('received 502');
+		response_.statusCode = 502;
+		response_.end('received 502');
 	});
 
-	s.get('/etag', (req, res) => {
-		res.setHeader('Cache-Control', 'public, max-age=0');
-		res.setHeader('ETag', '33a64df551425fcc55e4d42a148795d9f25f89d4');
+	s.get('/etag', (request_, response_) => {
+		response_.setHeader('Cache-Control', 'public, max-age=0');
+		response_.setHeader('ETag', '33a64df551425fcc55e4d42a148795d9f25f89d4');
 		let responseBody = 'etag';
 
-		if (req.headers['if-none-match'] === '33a64df551425fcc55e4d42a148795d9f25f89d4') {
-			res.statusCode = 304;
+		if (request_.headers['if-none-match'] === '33a64df551425fcc55e4d42a148795d9f25f89d4') {
+			response_.statusCode = 304;
 			responseBody = null;
 		}
 
-		res.end(responseBody);
+		response_.end(responseBody);
 	});
 
-	s.get('/revalidate-modified', (req, res) => {
-		res.setHeader('Cache-Control', 'public, max-age=0');
-		res.setHeader('ETag', '33a64df551425fcc55e4d42a148795d9f25f89d4');
+	s.get('/revalidate-modified', (request_, response_) => {
+		response_.setHeader('Cache-Control', 'public, max-age=0');
+		response_.setHeader('ETag', '33a64df551425fcc55e4d42a148795d9f25f89d4');
 		let responseBody = 'revalidate-modified';
 
-		if (req.headers['if-none-match'] === '33a64df551425fcc55e4d42a148795d9f25f89d4') {
-			res.setHeader('ETag', '0000000000000000000000000000000000');
+		if (request_.headers['if-none-match'] === '33a64df551425fcc55e4d42a148795d9f25f89d4') {
+			response_.setHeader('ETag', '0000000000000000000000000000000000');
 			responseBody = 'new-body';
 		}
 
-		res.end(responseBody);
+		response_.end(responseBody);
 	});
 
 	let cacheThenNoStoreIndex = 0;
-	s.get('/cache-then-no-store-on-revalidate', (req, res) => {
+	s.get('/cache-then-no-store-on-revalidate', (request_, response_) => {
 		const cc = cacheThenNoStoreIndex === 0 ? 'public, max-age=0' : 'public, no-cache, no-store';
 		cacheThenNoStoreIndex++;
-		res.setHeader('Cache-Control', cc);
-		res.end('cache-then-no-store-on-revalidate');
+		response_.setHeader('Cache-Control', cc);
+		response_.end('cache-then-no-store-on-revalidate');
 	});
 
-	s.get('/echo', (req, res) => {
-		const { headers, query, path, originalUrl, body } = req;
-		res.json({
+	s.get('/echo', (request_, response_) => {
+		const { headers, query, path, originalUrl, body } = request_;
+		response_.json({
 			headers,
 			query,
 			path,
 			originalUrl,
-			body
+			body,
 		});
 	});
+});
+
+test.after('cleanup', async () => {
+	await s.close();
 });
 
 test('Non cacheable responses are not cached', async t => {
@@ -122,8 +128,10 @@ test('Non cacheable responses are not cached', async t => {
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 
-	const firstResponseInt = Number((await cacheableRequestHelper(s.url + endpoint)).body);
-	const secondResponseInt = Number((await cacheableRequestHelper(s.url + endpoint)).body);
+	const firstResponseIntBody = await cacheableRequestHelper(s.url + endpoint);
+	const firstResponseInt = Number(firstResponseIntBody.body);
+	const secondResponseIntBody = await cacheableRequestHelper(s.url + endpoint);
+	const secondResponseInt = Number(secondResponseIntBody.body);
 
 	t.is(cache.size, 0);
 	t.true(firstResponseInt < secondResponseInt);
@@ -162,14 +170,14 @@ async function testCacheKey(t, input, expected) {
 		get(key) {
 			t.is(key, expectKey);
 			throw new Error(okMessage);
-		}
+		},
 	};
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	await t.throwsAsync(
 		cacheableRequestHelper(input),
 		undefined,
-		okMessage
+		okMessage,
 	);
 }
 
@@ -177,35 +185,35 @@ testCacheKey.title = (providedTitle, input) => util.format(
 	'Cache key is http.request compatible for arg %s(%j)%s',
 	input.constructor.name,
 	input,
-	providedTitle ? ` (${providedTitle})` : ''
+	providedTitle ? ` (${providedTitle})` : '',
 );
 test(
 	testCacheKey,
 	'http://www.example.com',
-	'GET:http://www.example.com'
+	'GET:http://www.example.com',
 );
 test(
 	'strips default path',
 	testCacheKey,
 	'http://www.example.com/',
-	'GET:http://www.example.com'
+	'GET:http://www.example.com',
 );
 test(
 	'keeps trailing /',
 	testCacheKey,
 	'http://www.example.com/test/',
-	'GET:http://www.example.com/test/'
+	'GET:http://www.example.com/test/',
 );
 test(
 	testCacheKey,
-	new url.URL('http://www.example.com'),
-	'GET:http://www.example.com'
+	new url.URL('http://www.example.com'), // eslint-disable-line node/prefer-global/url
+	'GET:http://www.example.com',
 );
 test(
 	'no requried properties',
 	testCacheKey,
 	{},
-	'GET:http://localhost'
+	'GET:http://localhost',
 );
 test(
 	testCacheKey,
@@ -213,96 +221,97 @@ test(
 		protocol: 'http:',
 		host: 'www.example.com',
 		port: 80,
-		path: '/'
+		path: '/',
 	},
-	'GET:http://www.example.com'
+	'GET:http://www.example.com',
 );
 test(
 	testCacheKey,
 	{
 		hostname: 'www.example.com',
 		port: 80,
-		path: '/'
+		path: '/',
 	},
-	'GET:http://www.example.com'
+	'GET:http://www.example.com',
 );
 test(
 	testCacheKey,
 	{
 		hostname: 'www.example.com',
 		port: 8080,
-		path: '/'
+		path: '/',
 	},
-	'GET:http://www.example.com:8080'
+	'GET:http://www.example.com:8080',
 );
 test(
 	testCacheKey,
 	{ host: 'www.example.com' },
-	'GET:http://www.example.com'
+	'GET:http://www.example.com',
 );
 test(
 	'hostname over host',
 	testCacheKey,
 	{
 		host: 'www.example.com',
-		hostname: 'xyz.example.com'
+		hostname: 'xyz.example.com',
 	},
-	'GET:http://xyz.example.com'
+	'GET:http://xyz.example.com',
 );
 test(
 	'hostname defaults to localhost',
 	testCacheKey,
 	{ path: '/' },
-	'GET:http://localhost'
+	'GET:http://localhost',
 );
 test(
 	'ignores pathname',
 	testCacheKey,
 	{
 		path: '/foo',
-		pathname: '/bar'
+		pathname: '/bar',
 	},
-	'GET:http://localhost/foo'
+	'GET:http://localhost/foo',
 );
 test(
 	'ignores search',
 	testCacheKey,
 	{
 		path: '/?foo=bar',
-		search: '?bar=baz'
+		search: '?bar=baz',
 	},
-	'GET:http://localhost/?foo=bar'
+	'GET:http://localhost/?foo=bar',
 );
 test(
 	'ignores query',
 	testCacheKey,
 	{
 		path: '/?foo=bar',
-		query: { bar: 'baz' }
+		query: { bar: 'baz' },
 	},
-	'GET:http://localhost/?foo=bar'
+	'GET:http://localhost/?foo=bar',
 );
 test(
 	testCacheKey,
 	{ auth: 'user:pass' },
-	'GET:http://user:pass@localhost'
+	'GET:http://user:pass@localhost',
 );
+
 test(
 	testCacheKey,
 	{ method: 'POST' },
-	'POST:http://localhost'
+	'POST:http://localhost',
 );
 
 test('request options path query is passed through', async t => {
 	const cacheableRequest = new CacheableRequest(request);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	const argString = `${s.url}/echo?foo=bar`;
-	const argURL = new url.URL(argString);
+	const argURL = new url.URL(argString); // eslint-disable-line node/prefer-global/url
 	const urlObject = url.parse(argString);
 	const argOptions = {
 		hostname: urlObject.hostname,
 		port: urlObject.port,
-		path: urlObject.path
+		path: urlObject.path,
 	};
 
 	const inputs = [argString, argURL, argOptions];
@@ -313,9 +322,9 @@ test('request options path query is passed through', async t => {
 		const message = util.format(
 			'when request arg is %s(%j)',
 			input.constructor.name,
-			input
+			input,
 		);
-		t.is(body.query.foo, 'bar', message);
+		t.is(body.query.foo, 'bar', message); // eslint-disable-line ava/assertion-arguments
 	}
 });
 
@@ -324,13 +333,13 @@ test('Setting opts.cache to false bypasses cache for a single request', async t 
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = url.parse(s.url + endpoint);
-	const optsNoCache = { cache: false, ...opts };
+	const options = url.parse(s.url + endpoint);
+	const optionsNoCache = { cache: false, ...options };
 
-	const firstResponse = await cacheableRequestHelper(opts);
-	const secondResponse = await cacheableRequestHelper(opts);
-	const thirdResponse = await cacheableRequestHelper(optsNoCache);
-	const fourthResponse = await cacheableRequestHelper(opts);
+	const firstResponse = await cacheableRequestHelper(options);
+	const secondResponse = await cacheableRequestHelper(options);
+	const thirdResponse = await cacheableRequestHelper(optionsNoCache);
+	const fourthResponse = await cacheableRequestHelper(options);
 
 	t.false(firstResponse.fromCache);
 	t.true(secondResponse.fromCache);
@@ -343,20 +352,20 @@ test('TTL is passed to cache', async t => {
 	const store = new Map();
 	const cache = {
 		get: store.get.bind(store),
-		set: (key, value, ttl) => {
+		set(key, value, ttl) {
 			t.is(typeof ttl, 'number');
 			t.true(ttl > 0);
 			return store.set(key, value, ttl);
 		},
-		delete: store.delete.bind(store)
+		delete: store.delete.bind(store),
 	};
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = { strictTtl: true, ...url.parse(s.url + endpoint) };
+	const options = { strictTtl: true, ...url.parse(s.url + endpoint) };
 
 	t.plan(2);
 
-	await cacheableRequestHelper(opts);
+	await cacheableRequestHelper(options);
 });
 
 test('TTL is not passed to cache if strictTtl is false', async t => {
@@ -364,19 +373,19 @@ test('TTL is not passed to cache if strictTtl is false', async t => {
 	const store = new Map();
 	const cache = {
 		get: store.get.bind(store),
-		set: (key, value, ttl) => {
+		set(key, value, ttl) {
 			t.true(typeof ttl === 'undefined');
 			return store.set(key, value, ttl);
 		},
-		delete: store.delete.bind(store)
+		delete: store.delete.bind(store),
 	};
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = { strictTtl: false, ...url.parse(s.url + endpoint) };
+	const options = { strictTtl: false, ...url.parse(s.url + endpoint) };
 
 	t.plan(1);
 
-	await cacheableRequestHelper(opts);
+	await cacheableRequestHelper(options);
 });
 
 test('Setting opts.maxTtl will limit the TTL', async t => {
@@ -384,22 +393,22 @@ test('Setting opts.maxTtl will limit the TTL', async t => {
 	const store = new Map();
 	const cache = {
 		get: store.get.bind(store),
-		set: (key, value, ttl) => {
+		set(key, value, ttl) {
 			t.is(ttl, 1000);
 			return store.set(key, value, ttl);
 		},
-		delete: store.delete.bind(store)
+		delete: store.delete.bind(store),
 	};
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = {
+	const options = {
 		...url.parse(s.url + endpoint),
-		maxTtl: 1000
+		maxTtl: 1000,
 	};
 
 	t.plan(1);
 
-	await cacheableRequestHelper(opts);
+	await cacheableRequestHelper(options);
 });
 
 test('Setting opts.maxTtl when opts.strictTtl is true will use opts.maxTtl if it\'s smaller', async t => {
@@ -407,23 +416,23 @@ test('Setting opts.maxTtl when opts.strictTtl is true will use opts.maxTtl if it
 	const store = new Map();
 	const cache = {
 		get: store.get.bind(store),
-		set: (key, value, ttl) => {
+		set(key, value, ttl) {
 			t.true(ttl === 1000);
 			return store.set(key, value, ttl);
 		},
-		delete: store.delete.bind(store)
+		delete: store.delete.bind(store),
 	};
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = {
+	const options = {
 		...url.parse(s.url + endpoint),
 		strictTtl: true,
-		maxTtl: 1000
+		maxTtl: 1000,
 	};
 
 	t.plan(1);
 
-	await cacheableRequestHelper(opts);
+	await cacheableRequestHelper(options);
 });
 
 test('Setting opts.maxTtl when opts.strictTtl is true will use remote TTL if it\'s smaller', async t => {
@@ -431,23 +440,23 @@ test('Setting opts.maxTtl when opts.strictTtl is true will use remote TTL if it\
 	const store = new Map();
 	const cache = {
 		get: store.get.bind(store),
-		set: (key, value, ttl) => {
-			t.true(ttl < 100000);
+		set(key, value, ttl) {
+			t.true(ttl < 100_000);
 			return store.set(key, value, ttl);
 		},
-		delete: store.delete.bind(store)
+		delete: store.delete.bind(store),
 	};
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = {
+	const options = {
 		...url.parse(s.url + endpoint),
 		strictTtl: true,
-		maxTtl: 100000
+		maxTtl: 100_000,
 	};
 
 	t.plan(1);
 
-	await cacheableRequestHelper(opts);
+	await cacheableRequestHelper(options);
 });
 
 test('Stale cache entries with Last-Modified headers are revalidated', async t => {
@@ -577,11 +586,11 @@ test('ability to force refresh', async t => {
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = url.parse(s.url + endpoint);
+	const options = url.parse(s.url + endpoint);
 
-	const firstResponse = await cacheableRequestHelper(opts);
-	const secondResponse = await cacheableRequestHelper({ ...opts, forceRefresh: true });
-	const thirdResponse = await cacheableRequestHelper(opts);
+	const firstResponse = await cacheableRequestHelper(options);
+	const secondResponse = await cacheableRequestHelper({ ...options, forceRefresh: true });
+	const thirdResponse = await cacheableRequestHelper(options);
 	t.not(firstResponse.body, secondResponse.body);
 	t.is(secondResponse.body, thirdResponse.body);
 });
@@ -591,14 +600,10 @@ test('checks status codes when comparing cache & response', async t => {
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const opts = url.parse(s.url + endpoint);
+	const options = url.parse(s.url + endpoint);
 
-	const firstResponse = await cacheableRequestHelper(opts);
-	const secondResponse = await cacheableRequestHelper(opts);
+	const firstResponse = await cacheableRequestHelper(options);
+	const secondResponse = await cacheableRequestHelper(options);
 	t.is(firstResponse.body, 'received 502');
 	t.is(secondResponse.body, 'ok');
-});
-
-test.after('cleanup', async () => {
-	await s.close();
 });
