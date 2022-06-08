@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/prefer-module */
+/* eslint-disable node/no-deprecated-api */
 'use strict';
 
 const EventEmitter = require('events');
@@ -24,40 +26,40 @@ class CacheableRequest {
 			this.cache = new Keyv({
 				uri: typeof cacheAdapter === 'string' && cacheAdapter,
 				store: typeof cacheAdapter !== 'string' && cacheAdapter,
-				namespace: 'cacheable-request'
+				namespace: 'cacheable-request',
 			});
 		}
 
-		return this.createCacheableRequest(request);
+		return this.createCacheableRequest(request); // eslint-disable-line no-constructor-return
 	}
 
 	createCacheableRequest(request) {
-		return (opts, cb) => {
+		return (options, cb) => {
 			let url;
-			if (typeof opts === 'string') {
-				url = normalizeUrlObject(urlLib.parse(opts));
-				opts = {};
-			} else if (opts instanceof urlLib.URL) {
-				url = normalizeUrlObject(urlLib.parse(opts.toString()));
-				opts = {};
+			if (typeof options === 'string') {
+				url = normalizeUrlObject(urlLib.parse(options));
+				options = {};
+			} else if (options instanceof urlLib.URL) { // eslint-disable-line node/prefer-global/url
+				url = normalizeUrlObject(urlLib.parse(options.toString()));
+				options = {};
 			} else {
-				const [pathname, ...searchParts] = (opts.path || '').split('?');
-				const search = searchParts.length > 0 ?
-					`?${searchParts.join('?')}` :
-					'';
-				url = normalizeUrlObject({ ...opts, pathname, search });
+				const [pathname, ...searchParts] = (options.path || '').split('?');
+				const search = searchParts.length > 0
+					? `?${searchParts.join('?')}`
+					: '';
+				url = normalizeUrlObject({ ...options, pathname, search });
 			}
 
-			opts = {
+			options = {
 				headers: {},
 				method: 'GET',
 				cache: true,
 				strictTtl: false,
 				automaticFailover: false,
-				...opts,
-				...urlObjectToRequestOptions(url)
+				...options,
+				...urlObjectToRequestOptions(url),
 			};
-			opts.headers = lowercaseKeys(opts.headers);
+			options.headers = lowercaseKeys(options.headers);
 
 			const ee = new EventEmitter();
 
@@ -66,29 +68,29 @@ class CacheableRequest {
 				{
 					stripWWW: false,
 					removeTrailingSlash: false,
-					stripAuthentication: false
-				}
+					stripAuthentication: false,
+				},
 			);
-			let key = `${opts.method}:${normalizedUrlString}`;
+			let key = `${options.method}:${normalizedUrlString}`;
 
 			// POST, PATCH, and PUT requests may be cached, depending on the response
 			// cache-control headers. As a result, the body of the request should be
 			// added to the cache key in order to avoid collisions.
-			if (opts.body && ['POST', 'PATCH', 'PUT'].indexOf(opts.method) !== -1) {
-				if (opts.body instanceof Readable) {
+			if (options.body && ['POST', 'PATCH', 'PUT'].includes(options.method)) {
+				if (options.body instanceof Readable) {
 					// Streamed bodies should completely skip the cache because they may
 					// or may not be hashable and in either case the stream would need to
 					// close before the cache key could be generated.
-					opts.cache = false;
+					options.cache = false;
 				} else {
-					key += `:${crypto.createHash('md5').update(opts.body).digest('hex')}`;
+					key += `:${crypto.createHash('md5').update(options.body).digest('hex')}`;
 				}
 			}
 
 			let revalidate = false;
 			let madeRequest = false;
 
-			const makeRequest = opts => {
+			const makeRequest = options_ => {
 				madeRequest = true;
 				let requestErrored = false;
 				let requestErrorCallback;
@@ -103,9 +105,9 @@ class CacheableRequest {
 				});
 
 				const handler = response => {
-					if (revalidate && !opts.forceRefresh) {
+					if (revalidate && !options_.forceRefresh) {
 						response.status = response.statusCode;
-						const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(opts, response);
+						const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 						if (!revalidatedPolicy.modified) {
 							const headers = revalidatedPolicy.policy.responseHeaders();
 							response = new Response(revalidate.statusCode, headers, revalidate.body, revalidate.url);
@@ -115,12 +117,12 @@ class CacheableRequest {
 					}
 
 					if (!response.fromCache) {
-						response.cachePolicy = new CachePolicy(opts, response, opts);
+						response.cachePolicy = new CachePolicy(options_, response, options_);
 						response.fromCache = false;
 					}
 
 					let clonedResponse;
-					if (opts.cache && response.cachePolicy.storable()) {
+					if (options_.cache && response.cachePolicy.storable()) {
 						clonedResponse = cloneResponse(response);
 
 						(async () => {
@@ -129,7 +131,7 @@ class CacheableRequest {
 
 								await Promise.race([
 									requestErrorPromise,
-									new Promise(resolve => response.once('end', resolve))
+									new Promise(resolve => response.once('end', resolve)), // eslint-disable-line no-promise-executor-return
 								]);
 
 								const body = await bodyPromise;
@@ -138,12 +140,12 @@ class CacheableRequest {
 									cachePolicy: response.cachePolicy.toObject(),
 									url: response.url,
 									statusCode: response.fromCache ? revalidate.statusCode : response.statusCode,
-									body
+									body,
 								};
 
-								let ttl = opts.strictTtl ? response.cachePolicy.timeToLive() : undefined;
-								if (opts.maxTtl) {
-									ttl = ttl ? Math.min(ttl, opts.maxTtl) : opts.maxTtl;
+								let ttl = options_.strictTtl ? response.cachePolicy.timeToLive() : undefined;
+								if (options_.maxTtl) {
+									ttl = ttl ? Math.min(ttl, options_.maxTtl) : options_.maxTtl;
 								}
 
 								await this.cache.set(key, value, ttl);
@@ -151,7 +153,7 @@ class CacheableRequest {
 								ee.emit('error', new CacheableRequest.CacheError(error));
 							}
 						})();
-					} else if (opts.cache && revalidate) {
+					} else if (options_.cache && revalidate) {
 						(async () => {
 							try {
 								await this.cache.delete(key);
@@ -168,26 +170,26 @@ class CacheableRequest {
 				};
 
 				try {
-					const req = request(opts, handler);
-					req.once('error', requestErrorCallback);
-					req.once('abort', requestErrorCallback);
-					ee.emit('request', req);
+					const request_ = request(options_, handler);
+					request_.once('error', requestErrorCallback);
+					request_.once('abort', requestErrorCallback);
+					ee.emit('request', request_);
 				} catch (error) {
 					ee.emit('error', new CacheableRequest.RequestError(error));
 				}
 			};
 
 			(async () => {
-				const get = async opts => {
+				const get = async options_ => {
 					await Promise.resolve();
 
-					const cacheEntry = opts.cache ? await this.cache.get(key) : undefined;
+					const cacheEntry = options_.cache ? await this.cache.get(key) : undefined;
 					if (typeof cacheEntry === 'undefined') {
-						return makeRequest(opts);
+						return makeRequest(options_);
 					}
 
 					const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
-					if (policy.satisfiesWithoutRevalidation(opts) && !opts.forceRefresh) {
+					if (policy.satisfiesWithoutRevalidation(options_) && !options_.forceRefresh) {
 						const headers = policy.responseHeaders();
 						const response = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
 						response.cachePolicy = policy;
@@ -199,8 +201,8 @@ class CacheableRequest {
 						}
 					} else {
 						revalidate = cacheEntry;
-						opts.headers = policy.revalidationHeaders(opts);
-						makeRequest(opts);
+						options_.headers = policy.revalidationHeaders(options_);
+						makeRequest(options_);
 					}
 				};
 
@@ -209,10 +211,10 @@ class CacheableRequest {
 				ee.on('response', () => this.cache.removeListener('error', errorHandler));
 
 				try {
-					await get(opts);
+					await get(options);
 				} catch (error) {
-					if (opts.automaticFailover && !madeRequest) {
-						makeRequest(opts);
+					if (options.automaticFailover && !madeRequest) {
+						makeRequest(options);
 					}
 
 					ee.emit('error', new CacheableRequest.CacheError(error));
@@ -246,7 +248,7 @@ function normalizeUrlObject(url) {
 		hostname: url.hostname || url.host || 'localhost',
 		port: url.port,
 		pathname: url.pathname,
-		search: url.search
+		search: url.search,
 	};
 }
 

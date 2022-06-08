@@ -1,5 +1,7 @@
+/* eslint-disable unicorn/prefer-module */
+
 const { request } = require('http');
-const test = require('ava'); // eslint-disable-line import/no-unresolved
+const test = require('ava');
 const Keyv = require('keyv');
 const CacheableRequest = require('this');
 
