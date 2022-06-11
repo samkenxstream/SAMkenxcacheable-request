@@ -8,7 +8,7 @@ import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
 import test from 'ava';
 import pify from 'pify';
-import CacheableRequest from '../src/index.js';
+import CacheableRequest from '../dist/index.js';
 
 let s;
 // Promisify cacheableRequest
