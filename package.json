@@ -6,14 +6,15 @@
 	"repository": "jaredwray/cacheable-request",
 	"author": "Jared Wray <me@jaredwray.com> (http://jaredwray.com)",
 	"type": "module",
-	"main": "src/index.js",
+	"main": "dist/index.js",
 	"engines": {
 		"node": ">=14"
 	},
 	"scripts": {
 		"test": "xo && nyc ava",
+		"build": "tsc",
 		"coverage": "nyc report --reporter=text-lcov > coverage.lcov",
-		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf coverage.lcov && rm -rf ./test/testdb.sqlite"
+		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf coverage.lcov && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
 	},
 	"files": [
 		"src"
@@ -49,6 +50,7 @@
 		"nyc": "^15.1.0",
 		"pify": "^6.0.0",
 		"sqlite3": "^5.0.8",
+		"typescript": "^4.7.3",
 		"xo": "^0.50.0"
 	},
 	"xo": {
