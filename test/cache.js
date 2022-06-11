@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/prefer-module */
 /* eslint-disable node/no-deprecated-api */
+
 const { request } = require('http');
 const url = require('url');
 const util = require('util'); // eslint-disable-line unicorn/import-style
@@ -7,7 +8,6 @@ const getStream = require('get-stream');
 const createTestServer = require('create-test-server');
 const delay = require('delay');
 const sqlite3 = require('sqlite3');
-const pify = require('pify');
 const CacheableRequest = require('this');
 const Keyv = require('keyv');
 
@@ -567,7 +567,9 @@ test('Keyv cache adapters load via connection uri', async t => {
 	const cacheableRequest = new CacheableRequest(request, 'sqlite://test/testdb.sqlite');
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	const db = new sqlite3.Database('test/testdb.sqlite');
-	const query = pify(db.all.bind(db));
+
+	const pify = await import('pify'); // eslint-disable-line node/no-unsupported-features/es-syntax
+	const query = await pify.default(db.all.bind(db));
 
 	const firstResponse = await cacheableRequestHelper(s.url + endpoint);
 	await delay(1000);
