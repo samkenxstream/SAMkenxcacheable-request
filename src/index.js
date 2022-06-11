@@ -1,18 +1,15 @@
-/* eslint-disable unicorn/prefer-module */
-/* eslint-disable node/no-deprecated-api */
-'use strict';
+import EventEmitter from 'node:events';
+import urlLib from 'node:url';
+import crypto from 'node:crypto';
+import stream from 'node:stream';
+import normalizeUrl from 'normalize-url';
+import getStream from 'get-stream';
+import CachePolicy from 'http-cache-semantics';
+import Response from 'responselike';
+import cloneResponse from 'clone-response';
+import Keyv from 'keyv';
 
-const EventEmitter = require('events');
-const urlLib = require('url');
-const crypto = require('crypto');
-const { Readable } = require('stream');
-const normalizeUrl = require('normalize-url');
-const getStream = require('get-stream');
-const CachePolicy = require('http-cache-semantics');
-const Response = require('responselike');
-const cloneResponse = require('clone-response');
-const Keyv = require('keyv');
-
+const { Readable } = stream;
 class CacheableRequest {
 	constructor(request, cacheAdapter) {
 		if (typeof request !== 'function') {
@@ -38,7 +35,7 @@ class CacheableRequest {
 			if (typeof options === 'string') {
 				url = normalizeUrlObject(urlLib.parse(options));
 				options = {};
-			} else if (options instanceof urlLib.URL) { // eslint-disable-line node/prefer-global/url
+			} else if (options instanceof urlLib.URL) {
 				url = normalizeUrlObject(urlLib.parse(options.toString()));
 				options = {};
 			} else {
@@ -59,19 +56,13 @@ class CacheableRequest {
 				...urlObjectToRequestOptions(url),
 			};
 			options.headers = Object.fromEntries(Object.entries(options.headers).map(([key, value]) => [key.toLowerCase(), value]));
-
 			const ee = new EventEmitter();
-
-			const normalizedUrlString = normalizeUrl(
-				urlLib.format(url),
-				{
-					stripWWW: false,
-					removeTrailingSlash: false,
-					stripAuthentication: false,
-				},
-			);
+			const normalizedUrlString = normalizeUrl(urlLib.format(url), {
+				stripWWW: false,
+				removeTrailingSlash: false,
+				stripAuthentication: false,
+			});
 			let key = `${options.method}:${normalizedUrlString}`;
-
 			// POST, PATCH, and PUT requests may be cached, depending on the response
 			// cache-control headers. As a result, the body of the request should be
 			// added to the cache key in order to avoid collisions.
@@ -88,12 +79,10 @@ class CacheableRequest {
 
 			let revalidate = false;
 			let madeRequest = false;
-
 			const makeRequest = options_ => {
 				madeRequest = true;
 				let requestErrored = false;
 				let requestErrorCallback;
-
 				const requestErrorPromise = new Promise(resolve => {
 					requestErrorCallback = () => {
 						if (!requestErrored) {
@@ -102,7 +91,6 @@ class CacheableRequest {
 						}
 					};
 				});
-
 				const handler = response => {
 					if (revalidate && !options_.forceRefresh) {
 						response.status = response.statusCode;
@@ -123,25 +111,20 @@ class CacheableRequest {
 					let clonedResponse;
 					if (options_.cache && response.cachePolicy.storable()) {
 						clonedResponse = cloneResponse(response);
-
 						(async () => {
 							try {
 								const bodyPromise = getStream.buffer(response);
-
 								await Promise.race([
 									requestErrorPromise,
 									new Promise(resolve => response.once('end', resolve)), // eslint-disable-line no-promise-executor-return
 								]);
-
 								const body = await bodyPromise;
-
 								const value = {
 									cachePolicy: response.cachePolicy.toObject(),
 									url: response.url,
 									statusCode: response.fromCache ? revalidate.statusCode : response.statusCode,
 									body,
 								};
-
 								let ttl = options_.strictTtl ? response.cachePolicy.timeToLive() : undefined;
 								if (options_.maxTtl) {
 									ttl = ttl ? Math.min(ttl, options_.maxTtl) : options_.maxTtl;
@@ -181,7 +164,6 @@ class CacheableRequest {
 			(async () => {
 				const get = async options_ => {
 					await Promise.resolve();
-
 					const cacheEntry = options_.cache ? await this.cache.get(key) : undefined;
 					if (typeof cacheEntry === 'undefined') {
 						return makeRequest(options_);
@@ -193,7 +175,6 @@ class CacheableRequest {
 						const response = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
 						response.cachePolicy = policy;
 						response.fromCache = true;
-
 						ee.emit('response', response);
 						if (typeof cb === 'function') {
 							cb(response);
@@ -208,7 +189,6 @@ class CacheableRequest {
 				const errorHandler = error => ee.emit('error', new CacheableRequest.CacheError(error));
 				this.cache.once('error', errorHandler);
 				ee.on('response', () => this.cache.removeListener('error', errorHandler));
-
 				try {
 					await get(options);
 				} catch (error) {
@@ -224,7 +204,6 @@ class CacheableRequest {
 		};
 	}
 }
-
 function urlObjectToRequestOptions(url) {
 	const options = { ...url };
 	options.path = `${url.pathname || '/'}${url.search || ''}`;
@@ -258,7 +237,6 @@ CacheableRequest.RequestError = class extends Error {
 		Object.assign(this, error);
 	}
 };
-
 CacheableRequest.CacheError = class extends Error {
 	constructor(error) {
 		super(error.message);
@@ -267,4 +245,4 @@ CacheableRequest.CacheError = class extends Error {
 	}
 };
 
-module.exports = CacheableRequest;
+export default CacheableRequest;
