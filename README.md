@@ -204,4 +204,5 @@ cacheableRequest('example.com', cb)
 ## License
 
 MIT © Luke Childs 2017-2021
+
 MIT © Jared Wray 2022
