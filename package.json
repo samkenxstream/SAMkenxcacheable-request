@@ -1,6 +1,6 @@
 {
 	"name": "cacheable-request",
-	"version": "7.0.2",
+	"version": "8.0.1",
 	"description": "Wrap native HTTP requests with RFC compliant cache support",
 	"license": "MIT",
 	"repository": "jaredwray/cacheable-request",
@@ -49,7 +49,6 @@
 		"nyc": "^15.1.0",
 		"pify": "^6.0.0",
 		"sqlite3": "^5.0.8",
-		"this": "^1.1.0",
 		"xo": "^0.50.0"
 	},
 	"xo": {

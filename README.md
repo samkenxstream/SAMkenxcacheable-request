@@ -35,8 +35,8 @@ npm install cacheable-request
 ## Usage
 
 ```js
-const http = require('http');
-const CacheableRequest = require('cacheable-request');
+import http from 'http';
+import CacheableRequest from 'cacheable-request';
 
 // Then instead of
 const req = http.request('http://example.com', cb);
