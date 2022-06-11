@@ -7,6 +7,7 @@ import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
 import test from 'ava';
+import pify from 'pify';
 import CacheableRequest from '../src/index.js';
 
 let s;
@@ -491,8 +492,7 @@ test('Keyv cache adapters load via connection uri', async t => {
 	);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	const db = new sqlite3.Database('test/testdb.sqlite');
-	const pify = await import('pify'); // eslint-disable-line node/no-unsupported-features/es-syntax
-	const query = await pify.default(db.all.bind(db));
+	const query = await pify(db.all.bind(db));
 	const firstResponse = await cacheableRequestHelper(s.url + endpoint);
 	await delay(1000);
 	const secondResponse = await cacheableRequestHelper(s.url + endpoint);
