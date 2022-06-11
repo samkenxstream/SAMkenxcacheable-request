@@ -10,7 +10,6 @@ const normalizeUrl = require('normalize-url');
 const getStream = require('get-stream');
 const CachePolicy = require('http-cache-semantics');
 const Response = require('responselike');
-const lowercaseKeys = require('lowercase-keys');
 const cloneResponse = require('clone-response');
 const Keyv = require('keyv');
 
@@ -59,7 +58,7 @@ class CacheableRequest {
 				...options,
 				...urlObjectToRequestOptions(url),
 			};
-			options.headers = lowercaseKeys(options.headers);
+			options.headers = Object.fromEntries(Object.entries(options.headers).map(([key, value]) => [key.toLowerCase(), value]));
 
 			const ee = new EventEmitter();
 
