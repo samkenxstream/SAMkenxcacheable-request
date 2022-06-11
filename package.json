@@ -5,6 +5,7 @@
 	"license": "MIT",
 	"repository": "jaredwray/cacheable-request",
 	"author": "Jared Wray <me@jaredwray.com> (http://jaredwray.com)",
+	"type": "module",
 	"main": "src/index.js",
 	"engines": {
 		"node": ">=14"
