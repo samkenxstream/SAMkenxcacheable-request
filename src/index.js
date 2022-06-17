@@ -1,13 +1,13 @@
 import EventEmitter from 'node:events';
 import urlLib from 'node:url';
 import crypto from 'node:crypto';
-import stream from 'node:stream';
+import stream, { PassThrough as PassThroughStream } from 'node:stream';
 import normalizeUrl from 'normalize-url';
 import getStream from 'get-stream';
 import CachePolicy from 'http-cache-semantics';
 import Response from 'responselike';
-import cloneResponse from 'clone-response';
 import Keyv from 'keyv';
+import mimicResponse from 'mimic-response';
 
 const { Readable } = stream;
 class CacheableRequest {
@@ -166,7 +166,8 @@ class CacheableRequest {
 					await Promise.resolve();
 					const cacheEntry = options_.cache ? await this.cache.get(key) : undefined;
 					if (typeof cacheEntry === 'undefined') {
-						return makeRequest(options_);
+						makeRequest(options_);
+						return;
 					}
 
 					const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
@@ -204,6 +205,17 @@ class CacheableRequest {
 		};
 	}
 }
+function cloneResponse(response) {
+	if (!(response && response.pipe)) {
+		throw new TypeError('Parameter `response` must be a response stream.');
+	}
+
+	const clone = new PassThroughStream({ autoDestroy: false });
+	mimicResponse(response, clone);
+
+	return response.pipe(clone);
+}
+
 function urlObjectToRequestOptions(url) {
 	const options = { ...url };
 	options.path = `${url.pathname || '/'}${url.search || ''}`;
