@@ -15,7 +15,7 @@ class CacheableRequest {
 	static CacheError: any;
 	cache: any;
 	request: Function;
-	constructor(request: Function, cacheAdapter: any) {
+	constructor(request: Function, cacheAdapter?: any) {
 		if (typeof request !== 'function') {
 			throw new TypeError('Parameter `request` must be a function');
 		}
@@ -136,7 +136,7 @@ class CacheableRequest {
 								}
 
 								await this.cache.set(key, value, ttl);
-							} catch (error) {
+							} catch (error: unknown) {
 								ee.emit('error', new CacheableRequest.CacheError(error));
 							}
 						})();
@@ -144,7 +144,7 @@ class CacheableRequest {
 						(async () => {
 							try {
 								await this.cache.delete(key);
-							} catch (error) {
+							} catch (error: unknown) {
 								ee.emit('error', new CacheableRequest.CacheError(error));
 							}
 						})();
@@ -161,7 +161,7 @@ class CacheableRequest {
 					request_.once('error', requestErrorCallback);
 					request_.once('abort', requestErrorCallback);
 					ee.emit('request', request_);
-				} catch (error) {
+				} catch (error: unknown) {
 					ee.emit('error', new CacheableRequest.RequestError(error));
 				}
 			};
@@ -197,7 +197,7 @@ class CacheableRequest {
 				ee.on('response', () => this.cache.removeListener('error', errorHandler));
 				try {
 					await get(options);
-				} catch (error) {
+				} catch (error: unknown) {
 					if (options.automaticFailover && !madeRequest) {
 						makeRequest(options);
 					}
