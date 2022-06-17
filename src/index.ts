@@ -11,7 +11,11 @@ import mimicResponse from 'mimic-response';
 
 const { Readable } = stream;
 class CacheableRequest {
-	constructor(request, cacheAdapter) {
+	static RequestError: any;
+	static CacheError: any;
+	cache: any;
+	request: Function;
+	constructor(request: Function, cacheAdapter: any) {
 		if (typeof request !== 'function') {
 			throw new TypeError('Parameter `request` must be a function');
 		}
@@ -20,17 +24,18 @@ class CacheableRequest {
 			this.cache = cacheAdapter;
 		} else {
 			this.cache = new Keyv({
-				uri: typeof cacheAdapter === 'string' && cacheAdapter,
+				uri: (typeof cacheAdapter === 'string' && cacheAdapter) || '',
 				store: typeof cacheAdapter !== 'string' && cacheAdapter,
 				namespace: 'cacheable-request',
 			});
 		}
 
-		return this.createCacheableRequest(request); // eslint-disable-line no-constructor-return
+		this.createCacheableRequest = this.createCacheableRequest.bind(this);
+		this.request = request;
 	}
 
-	createCacheableRequest(request) {
-		return (options, cb) => {
+	createCacheableRequest() {
+		return (options: any, cb: any) => {
 			let url;
 			if (typeof options === 'string') {
 				url = normalizeUrlObject(urlLib.parse(options));
@@ -77,13 +82,13 @@ class CacheableRequest {
 				}
 			}
 
-			let revalidate = false;
+			let revalidate: any = false;
 			let madeRequest = false;
-			const makeRequest = options_ => {
+			const makeRequest = (options_: any) => {
 				madeRequest = true;
 				let requestErrored = false;
 				let requestErrorCallback;
-				const requestErrorPromise = new Promise(resolve => {
+				const requestErrorPromise = new Promise<void>(resolve => {
 					requestErrorCallback = () => {
 						if (!requestErrored) {
 							requestErrored = true;
@@ -91,7 +96,7 @@ class CacheableRequest {
 						}
 					};
 				});
-				const handler = response => {
+				const handler = (response: any) => {
 					if (revalidate && !options_.forceRefresh) {
 						response.status = response.statusCode;
 						const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
@@ -152,7 +157,7 @@ class CacheableRequest {
 				};
 
 				try {
-					const request_ = request(options_, handler);
+					const request_ = this.request(options_, handler);
 					request_.once('error', requestErrorCallback);
 					request_.once('abort', requestErrorCallback);
 					ee.emit('request', request_);
@@ -162,7 +167,7 @@ class CacheableRequest {
 			};
 
 			(async () => {
-				const get = async options_ => {
+				const get = async (options_: any) => {
 					await Promise.resolve();
 					const cacheEntry = options_.cache ? await this.cache.get(key) : undefined;
 					if (typeof cacheEntry === 'undefined') {
@@ -173,7 +178,7 @@ class CacheableRequest {
 					const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
 					if (policy.satisfiesWithoutRevalidation(options_) && !options_.forceRefresh) {
 						const headers = policy.responseHeaders();
-						const response = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
+						const response: any = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
 						response.cachePolicy = policy;
 						response.fromCache = true;
 						ee.emit('response', response);
@@ -187,7 +192,7 @@ class CacheableRequest {
 					}
 				};
 
-				const errorHandler = error => ee.emit('error', new CacheableRequest.CacheError(error));
+				const errorHandler = (error: any) => ee.emit('error', new CacheableRequest.CacheError(error));
 				this.cache.once('error', errorHandler);
 				ee.on('response', () => this.cache.removeListener('error', errorHandler));
 				try {
@@ -205,8 +210,8 @@ class CacheableRequest {
 		};
 	}
 }
-function cloneResponse(response) {
-	if (!(response && response.pipe)) {
+function cloneResponse(response: any) {
+	if (!(response?.pipe)) {
 		throw new TypeError('Parameter `response` must be a response stream.');
 	}
 
@@ -216,15 +221,20 @@ function cloneResponse(response) {
 	return response.pipe(clone);
 }
 
-function urlObjectToRequestOptions(url) {
-	const options = { ...url };
+function urlObjectToRequestOptions(url: any) {
+	interface Option {
+		path: string;
+		pathname?: string;
+		search?: string;
+	}
+	const options: Option = { ...url };
 	options.path = `${url.pathname || '/'}${url.search || ''}`;
 	delete options.pathname;
 	delete options.search;
 	return options;
 }
 
-function normalizeUrlObject(url) {
+function normalizeUrlObject(url: any) {
 	// If url was parsed by url.parse or new URL:
 	// - hostname will be set
 	// - host will be hostname[:port]
@@ -243,14 +253,14 @@ function normalizeUrlObject(url) {
 }
 
 CacheableRequest.RequestError = class extends Error {
-	constructor(error) {
+	constructor(error: any) {
 		super(error.message);
 		this.name = 'RequestError';
 		Object.assign(this, error);
 	}
 };
 CacheableRequest.CacheError = class extends Error {
-	constructor(error) {
+	constructor(error: any) {
 		super(error.message);
 		this.name = 'CacheError';
 		Object.assign(this, error);
