@@ -14,8 +14,7 @@ let s;
 // Promisify cacheableRequest
 const promisify = cacheableRequest => options =>
 	new Promise((resolve, reject) => {
-		const createRequest = cacheableRequest.createCacheableRequest();
-		createRequest(options, async response => {
+		cacheableRequest(options, async response => {
 			const body = await getStream(response);
 			response.body = body;
 			// Give the cache time to update
@@ -472,8 +471,7 @@ test('Undefined callback parameter inside cache logic is handled', async t => {
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	await cacheableRequestHelper(s.url + endpoint);
-	const createCacheableRequest = cacheableRequest.createCacheableRequest();
-	createCacheableRequest(s.url + endpoint);
+	cacheableRequest(s.url + endpoint);
 	await delay(500);
 	t.pass();
 });
