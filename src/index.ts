@@ -30,7 +30,7 @@ const CacheableRequest = function (request: Function, cacheAdapter?: any) {
 };
 
 function createCacheableRequest(request: Function, cache: any) {
-	return (options: any, cb: any) => {
+	return (options: any, cb?: (response: {}) => void) => {
 		let url;
 		if (typeof options === 'string') {
 			url = normalizeUrlObject(urlLib.parse(options));
