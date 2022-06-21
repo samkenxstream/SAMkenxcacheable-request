@@ -3,24 +3,24 @@ import { request } from 'node:http';
 import stream from 'node:stream';
 import url from 'node:url';
 import { promisify } from 'node:util';
-import anyTest, {TestFn} from 'ava';
+import anyTest, { TestFn } from 'ava';
 import createTestServer from 'create-test-server';
 import getStream from 'get-stream';
 import CacheableRequest from '../dist/index.js';
 
 const { PassThrough } = stream;
 const test = anyTest as TestFn<{s: any}>;
-test.before('setup', async (t) => {
-	let s = await createTestServer();
+test.before('setup', async t => {
+	const s = await createTestServer();
 	s.get('/', (request_, response_) => {
 		response_.setHeader('cache-control', 'max-age=60');
 		response_.end('hi');
 	});
 	s.post('/', (request_, response_) => response_.status(201).end('hello'));
-  t.context = {s: s};
+	t.context = { s };
 });
-test.after('cleanup', async (t) => {
-	//await t.context.s.close();
+test.after('cleanup', async t => {
+	// Await t.context.s.close();
 });
 test('cacheableRequest is a function', t => {
 	const cacheableRequest = CacheableRequest(request);

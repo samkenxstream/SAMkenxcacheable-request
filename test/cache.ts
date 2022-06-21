@@ -1,7 +1,7 @@
-import anyTest, {TestFn} from 'ava';
 import { request } from 'node:http';
 import url from 'node:url';
 import util from 'node:util';
+import anyTest, { TestFn } from 'ava';
 import getStream from 'get-stream';
 import createTestServer from 'create-test-server';
 import delay from 'delay';
@@ -12,21 +12,19 @@ import CacheableRequest from '../dist/index.js';
 
 const test = anyTest as TestFn<{s: any}>;
 // Promisify cacheableRequest
-const promisify = (cacheableRequest: any) => (options: any) => {
-	return new Promise((resolve, reject) => {
-		cacheableRequest(options, async (response: any) => {
-			const body = await getStream(response);
-			response.body = body;
-			// Give the cache time to update
-			await delay(100);
-			resolve(response);
-		})
-			.on('request', (request_: any) => request_.end())
-			.once('error', reject);
-	});
-}
-test.before('setup', async (t) => {
-	let s = await createTestServer();
+const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {
+	cacheableRequest(options, async (response: any) => {
+		const body = await getStream(response);
+		response.body = body;
+		// Give the cache time to update
+		await delay(100);
+		resolve(response);
+	})
+		.on('request', (request_: any) => request_.end())
+		.once('error', reject);
+});
+test.before('setup', async t => {
+	const s = await createTestServer();
 	let noStoreIndex = 0;
 	s.get('/no-store', (request_, response_) => {
 		noStoreIndex++;
@@ -111,10 +109,10 @@ test.before('setup', async (t) => {
 			body,
 		});
 	});
-	t.context = {s: s}
+	t.context = { s };
 });
-test.after('cleanup', async (t) => {
-	//await t.context.s.close();
+test.after('cleanup', async t => {
+	// Await t.context.s.close();
 });
 
 test('Non cacheable responses are not cached', async t => {
@@ -291,7 +289,7 @@ test('request options path query is passed through', async t => {
 			input.constructor.name,
 			input,
 		);
-		// eslint-disable-next-line ava/assertion-arguments
+
 		t.is(body.query.foo, 'bar', message);
 	}
 });
