@@ -82,3 +82,6 @@ Temporary Items
 
 # Typescript
 dist
+
+# Coverage
+coverage.lcov
