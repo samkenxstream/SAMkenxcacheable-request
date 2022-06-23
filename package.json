@@ -6,7 +6,6 @@
 	"repository": "jaredwray/cacheable-request",
 	"author": "Jared Wray <me@jaredwray.com> (http://jaredwray.com)",
 	"type": "module",
-	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": "./dist/index.js",
 	"engines": {
