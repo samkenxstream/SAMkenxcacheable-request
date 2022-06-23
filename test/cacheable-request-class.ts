@@ -1,7 +1,7 @@
 import { request } from 'node:http';
 import test from 'ava';
 import Keyv from 'keyv';
-import CacheableRequest from '../dist/index.js';
+import CacheableRequest from '../src/index.js';
 
 test('CacheableRequest is a function', t => {
 	t.is(typeof CacheableRequest, 'function');

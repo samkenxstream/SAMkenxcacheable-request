@@ -8,7 +8,7 @@ import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
 import pify from 'pify';
-import CacheableRequest from '../dist/index.js';
+import CacheableRequest from '../src/index.js';
 
 const test = anyTest as TestFn<{s: any}>;
 // Promisify cacheableRequest

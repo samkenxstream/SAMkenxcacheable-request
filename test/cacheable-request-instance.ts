@@ -6,7 +6,7 @@ import { promisify } from 'node:util';
 import anyTest, { TestFn } from 'ava';
 import createTestServer from 'create-test-server';
 import getStream from 'get-stream';
-import CacheableRequest from '../dist/index.js';
+import CacheableRequest from '../src/index.js';
 
 const { PassThrough } = stream;
 const test = anyTest as TestFn<{s: any}>;
