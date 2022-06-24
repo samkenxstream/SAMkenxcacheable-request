@@ -29,9 +29,6 @@ jobs:
       - name: Test Packages
         run: npm test
 
-      - name: Generate Code Coverage Report
-        run: npm run coverage
-
       - name: Code Coverage
         uses: codecov/codecov-action@v2
         with:
