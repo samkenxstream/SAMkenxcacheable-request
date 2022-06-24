@@ -2,9 +2,9 @@ name: tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, typescript ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, typescript ]
 
 jobs:
   build:
@@ -28,9 +28,6 @@ jobs:
         
       - name: Test Packages
         run: npm test
-
-      - name: Generate Code Coverage Report
-        run: npm run coverage
 
       - name: Code Coverage
         uses: codecov/codecov-action@v2

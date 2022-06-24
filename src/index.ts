@@ -11,10 +11,6 @@ import mimicResponse from 'mimic-response';
 
 const { Readable } = stream;
 const CacheableRequest = function (request: Function, cacheAdapter?: any) {
-	if (typeof request !== 'function') {
-		throw new TypeError('Parameter `request` must be a function');
-	}
-
 	let cache: any = {};
 	if (cacheAdapter instanceof Keyv) {
 		cache = cacheAdapter;
