@@ -15,6 +15,9 @@
 		"build": "tsc --project tsconfig.build.json",
 		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf ./coverage && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
 	},
+	"files": [
+		"dist"
+	],
 	"keywords": [
 		"HTTP",
 		"HTTPS",
