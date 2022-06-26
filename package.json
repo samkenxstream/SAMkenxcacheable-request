@@ -12,8 +12,8 @@
 	},
 	"scripts": {
 		"test": "xo && jest --coverage --detectOpenHandles",
-		"build": "tsc",
-		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf coverage.lcov && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
+		"build": "tsc --project tsconfig.build.json",
+		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf ./coverage && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
 	},
 	"files": [
 		"src"
