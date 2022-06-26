@@ -11,7 +11,7 @@
 		"node": ">=14.16"
 	},
 	"scripts": {
-		"test": "xo && jest --coverage --detectOpenHandles",
+		"test": "xo && jest --coverage",
 		"build": "tsc --project tsconfig.build.json",
 		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf ./coverage && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
 	},
