@@ -5,8 +5,8 @@
 	"license": "MIT",
 	"repository": "jaredwray/cacheable-request",
 	"author": "Jared Wray <me@jaredwray.com> (http://jaredwray.com)",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"engines": {
 		"node": ">=14.16"
 	},
@@ -14,18 +14,6 @@
 		"test": "xo && jest --coverage --detectOpenHandles",
 		"build": "tsc --project tsconfig.build.json",
 		"clean": "rm -rf node_modules && rm -rf .nyc_output && rm -rf ./coverage && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
-	},
-	"files": [
-		"src"
-	],
-	"ava": {
-		"extensions": {
-			"ts": "module"
-		},
-		"nodeArguments": [
-			"--loader=ts-node/esm"
-		],
-		"verbose": true
 	},
 	"keywords": [
 		"HTTP",
@@ -60,10 +48,8 @@
 		"@types/pify": "^5.0.1",
 		"@types/responselike": "^1.0.0",
 		"@types/sqlite3": "^3.1.8",
-		"babel-jest": "^28.1.1",
 		"create-test-server": "3.0.1",
 		"delay": "^5.0.0",
-		"eslint-config-xo-lukechilds": "^1.0.1",
 		"jest": "^28.1.1",
 		"pify": "^5.0.0",
 		"sqlite3": "^5.0.8",
@@ -83,8 +69,7 @@
 			"js"
 		],
 		"transform": {
-			"^.+\\.(ts|tsx)$": "ts-jest",
-			"^.+\\.(js|jsx)$": "babel-jest"
+			"^.+\\.(ts|tsx)$": "ts-jest"
 		},
 		"testMatch": [
 			"**/test/*.test.(ts)"
@@ -92,7 +77,6 @@
 		"testEnvironment": "node"
 	},
 	"xo": {
-		"extends": "xo-lukechilds",
 		"rules": {
 			"@typescript-eslint/object-curly-spacing": 0,
 			"@typescript-eslint/naming-convention": 0,
