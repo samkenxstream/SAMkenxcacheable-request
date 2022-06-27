@@ -2,7 +2,6 @@ import EventEmitter from 'node:events';
 import { request } from 'node:http';
 import stream from 'node:stream';
 import url from 'node:url';
-import { promisify } from 'node:util';
 import createTestServer from 'create-test-server';
 import getStream from 'get-stream';
 import CacheableRequest from '../src/index'; // eslint-disable-line import/extensions
@@ -84,13 +83,13 @@ test('cacheableRequest emits response event for cached responses', () => {
 		});
 	}).on('request', (request_: any) => request_.end());
 });
-test('cacheableRequest emits CacheError if cache adapter connection errors', done => {
+test('cacheableRequest emits CacheError if cache adapter connection errors', done => { // eslint-disable-line jest/no-done-callback
 	const cacheableRequest = CacheableRequest(request, 'sqlite://non/existent/database.sqlite');
 	cacheableRequest(url.parse(s.url))
 		.on('error', (error: any) => {
 			expect(error instanceof CacheableRequest.CacheError).toBeTruthy();
 			if (error.code === 'SQLITE_CANTOPEN') {
-				expect(error.code).toBe('SQLITE_CANTOPEN');
+				expect(error.code).toBe('SQLITE_CANTOPEN'); // eslint-disable-line jest/no-conditional-expect
 			}
 
 			done();
@@ -133,7 +132,7 @@ test('cacheableRequest emits CacheError if cache.set errors', () => {
 		})
 		.on('request', (request_: any) => request_.end());
 });
-test('cacheableRequest emits CacheError if cache.delete errors', done => {
+test('cacheableRequest emits CacheError if cache.delete errors', done => { // eslint-disable-line jest/no-done-callback
 	const errorMessage = 'Fail';
 	const store = new Map();
 	const cache = {
@@ -168,7 +167,7 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => {
 		}).on('request', (request_: any) => request_.end());
 	})();
 });
-test('cacheableRequest emits RequestError if request function throws', done => {
+test('cacheableRequest emits RequestError if request function throws', done => { // eslint-disable-line jest/no-done-callback
 	const cacheableRequest = CacheableRequest(request);
 	const options: any = url.parse(s.url);
 	options.headers = { invalid: '💣' };
@@ -179,8 +178,9 @@ test('cacheableRequest emits RequestError if request function throws', done => {
 		})
 		.on('request', (request_: any) => request_.end());
 });
-test('cacheableRequest does not cache response if request is aborted before receiving first byte of response', done => {
+test('cacheableRequest does not cache response if request is aborted before receiving first byte of response', done => { // eslint-disable-line jest/no-done-callback
 	/* eslint-disable max-nested-callbacks */
+
 	createTestServer().then(s => {
 		s.get('/delay-start', (request_: any, response_: any) => {
 			setTimeout(() => {
@@ -209,8 +209,9 @@ test('cacheableRequest does not cache response if request is aborted before rece
 	});
 	/* eslint-enable max-nested-callbacks */
 });
-test('cacheableRequest does not cache response if request is aborted after receiving part of the response', done => {
+test('cacheableRequest does not cache response if request is aborted after receiving part of the response', done => { // eslint-disable-line jest/no-done-callback
 	/* eslint-disable max-nested-callbacks */
+
 	createTestServer().then(s => {
 		s.get('/delay-partial', (request_, response_) => {
 			response_.setHeader('cache-control', 'max-age=60');
@@ -291,10 +292,10 @@ test('cacheableRequest hashes request body as cache key', async () => {
 		.on('error', () => {})
 		.on('request', (request_: any) => request_.end());
 });
-test('cacheableRequest skips cache for streamed body', done => {
+test('cacheableRequest skips cache for streamed body', done => { // eslint-disable-line jest/no-done-callback
 	const cache = {
 		get() {
-			fail();
+			fail(new CacheableRequest.CacheError(new Error('Cache error'))); // eslint-disable-line jest/no-jasmine-globals
 		},
 		set() {},
 		delete() {},
