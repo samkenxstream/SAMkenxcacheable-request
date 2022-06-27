@@ -79,3 +79,9 @@ Temporary Items
 
 # Visual Studio folder
 .vscode
+
+# Typescript
+dist
+
+# Coverage
+coverage.lcov

@@ -22,15 +22,14 @@ jobs:
       
       - name: Install Dependencies  
         run: npm install
+
+      - name: Run Build  
+        run: npm run build
         
       - name: Test Packages
         run: npm test
-
-      - name: Generate Code Coverage Report
-        run: npm run coverage
 
       - name: Code Coverage
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_KEY }}
-          files: coverage.lcov
