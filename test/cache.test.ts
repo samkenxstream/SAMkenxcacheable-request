@@ -162,20 +162,26 @@ const testCacheKey = async (input: any, expected: any) => {
 	await expect(cacheableRequestHelper(input)).rejects.toThrow();
 };
 
+// eslint-disable-next-line jest/expect-expect
 test('return with GET', async () => testCacheKey('http://www.example.com', 'GET:http://www.example.com'));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'strips default path',
 	async () => testCacheKey('http://www.example.com/', 'GET:http://www.example.com'),
 );
+// eslint-disable-next-line jest/expect-expect
 test(
 	'keeps trailing /',
 	async () => testCacheKey('http://www.example.com/test/', 'GET:http://www.example.com/test/'),
 );
+// eslint-disable-next-line jest/expect-expect
 test(
 	'return with GET.',
 	async () => testCacheKey(new url.URL('http://www.example.com'), 'GET:http://www.example.com'),
 );
+// eslint-disable-next-line jest/expect-expect
 test('no requried properties', async () => testCacheKey({}, 'GET:http://localhost'));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'return without slash',
 	async () => testCacheKey(
@@ -187,6 +193,7 @@ test(
 		},
 		'GET:http://www.example.com',
 	));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'return without port',
 	async () => testCacheKey(
@@ -197,6 +204,7 @@ test(
 		},
 		'GET:http://www.example.com',
 	));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'return with url and port',
 	async () => testCacheKey(
@@ -207,7 +215,9 @@ test(
 		},
 		'GET:http://www.example.com:8080',
 	));
+// eslint-disable-next-line jest/expect-expect
 test('return with protocol', async () => testCacheKey({ host: 'www.example.com' }, 'GET:http://www.example.com'));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'hostname over host',
 	async () => testCacheKey(
@@ -217,12 +227,14 @@ test(
 		},
 		'GET:http://xyz.example.com',
 	));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'hostname defaults to localhost',
 	async () => testCacheKey(
 		{ path: '/' },
 		'GET:http://localhost',
 	));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'ignores pathname',
 	async () => testCacheKey(
@@ -232,6 +244,7 @@ test(
 		},
 		'GET:http://localhost/foo',
 	));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'ignores search',
 	async () => testCacheKey(
@@ -241,6 +254,7 @@ test(
 		},
 		'GET:http://localhost/?foo=bar',
 	));
+// eslint-disable-next-line jest/expect-expect
 test(
 	'ignores query',
 	async () => testCacheKey(
@@ -250,7 +264,9 @@ test(
 		},
 		'GET:http://localhost/?foo=bar',
 	));
+// eslint-disable-next-line jest/expect-expect
 test('auth should be in url', async () => testCacheKey({ auth: 'user:pass' }, 'GET:http://user:pass@localhost'));
+// eslint-disable-next-line jest/expect-expect
 test('should return default url', async () => testCacheKey({ method: 'POST' }, 'POST:http://localhost'));
 test('request options path query is passed through', async () => {
 	const cacheableRequest = CacheableRequest(request);

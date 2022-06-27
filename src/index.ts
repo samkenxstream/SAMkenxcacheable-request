@@ -202,10 +202,6 @@ function createCacheableRequest(request: Function, cache: any) {
 }
 
 function cloneResponse(response: any) {
-	if (!(response?.pipe)) {
-		throw new TypeError('Parameter `response` must be a response stream.');
-	}
-
 	const clone = new PassThroughStream({ autoDestroy: false });
 	mimicResponse(response, clone);
 
