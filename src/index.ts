@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 import urlLib from 'node:url';
 import crypto from 'node:crypto';
-import stream, { PassThrough as PassThroughStream } from 'node:stream';
+import stream, {PassThrough as PassThroughStream} from 'node:stream';
 import normalizeUrl from 'normalize-url';
 import getStream from 'get-stream';
 import CachePolicy from 'http-cache-semantics';
@@ -9,7 +9,7 @@ import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
 
-const { Readable } = stream;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const CacheableRequest = function (request: Function, cacheAdapter?: any) {
 	let cache: any = {};
 	if (cacheAdapter instanceof Keyv) {
@@ -26,7 +26,7 @@ const CacheableRequest = function (request: Function, cacheAdapter?: any) {
 };
 
 function createCacheableRequest(request: Function, cache: any) {
-	return (options: any, cb?: (response: {}) => void) => {
+	return (options: any, cb?: (response: Record<string, unknown>) => void) => {
 		let url;
 		if (typeof options === 'string') {
 			url = normalizeUrlObject(urlLib.parse(options));
@@ -39,7 +39,7 @@ function createCacheableRequest(request: Function, cache: any) {
 			const search = searchParts.length > 0
 				? `?${searchParts.join('?')}`
 				: '';
-			url = normalizeUrlObject({ ...options, pathname, search });
+			url = normalizeUrlObject({...options, pathname, search});
 		}
 
 		options = {
@@ -54,7 +54,7 @@ function createCacheableRequest(request: Function, cache: any) {
 		options.headers = Object.fromEntries(Object.entries(options.headers).map(([key, value]) => [key.toLowerCase(), value]));
 		const ee = new EventEmitter();
 		const normalizedUrlString = normalizeUrl(urlLib.format(url), {
-			stripWWW: false,
+			stripWWW: false, // eslint-disable-line @typescript-eslint/naming-convention
 			removeTrailingSlash: false,
 			stripAuthentication: false,
 		});
@@ -63,7 +63,7 @@ function createCacheableRequest(request: Function, cache: any) {
 		// cache-control headers. As a result, the body of the request should be
 		// added to the cache key in order to avoid collisions.
 		if (options.body && ['POST', 'PATCH', 'PUT'].includes(options.method)) {
-			if (options.body instanceof Readable) {
+			if (options.body instanceof stream.Readable) {
 				// Streamed bodies should completely skip the cache because they may
 				// or may not be hashable and in either case the stream would need to
 				// close before the cache key could be generated.
@@ -202,7 +202,7 @@ function createCacheableRequest(request: Function, cache: any) {
 }
 
 function cloneResponse(response: any) {
-	const clone = new PassThroughStream({ autoDestroy: false });
+	const clone = new PassThroughStream({autoDestroy: false});
 	mimicResponse(response, clone);
 
 	return response.pipe(clone);
@@ -214,7 +214,7 @@ function urlObjectToRequestOptions(url: any) {
 		pathname?: string;
 		search?: string;
 	}
-	const options: Option = { ...url };
+	const options: Option = {...url};
 	options.path = `${url.pathname || '/'}${url.search || ''}`;
 	delete options.pathname;
 	delete options.search;

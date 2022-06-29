@@ -1,4 +1,4 @@
-import { request } from 'node:http';
+import {request} from 'node:http';
 import url from 'node:url';
 import util from 'node:util';
 import getStream from 'get-stream';
@@ -99,7 +99,7 @@ beforeAll(async () => {
 		response_.end('cache-then-no-store-on-revalidate');
 	});
 	s.get('/echo', (request_: any, response_: any) => {
-		const { headers, query, path, originalUrl, body } = request_;
+		const {headers, query, path, originalUrl, body} = request_;
 		response_.json({
 			headers,
 			query,
@@ -148,11 +148,11 @@ test('Cacheable responses have unique cache key', async () => {
 	expect(firstResponse.body).not.toBe(secondResponse.body);
 });
 
-const testCacheKey = async (input: any, expected: any) => {
+const testCacheKey = async (input: any, expected: string) => {
 	const expectKey = `cacheable-request:${expected}`;
 	const okMessage = `OK ${expectKey}`;
 	const cache = {
-		get(key: any) {
+		get(key: string) {
 			expect(key).toBe(expectKey);
 			throw new Error(okMessage);
 		},
@@ -216,7 +216,7 @@ test(
 		'GET:http://www.example.com:8080',
 	));
 // eslint-disable-next-line jest/expect-expect
-test('return with protocol', async () => testCacheKey({ host: 'www.example.com' }, 'GET:http://www.example.com'));
+test('return with protocol', async () => testCacheKey({host: 'www.example.com'}, 'GET:http://www.example.com'));
 // eslint-disable-next-line jest/expect-expect
 test(
 	'hostname over host',
@@ -231,7 +231,7 @@ test(
 test(
 	'hostname defaults to localhost',
 	async () => testCacheKey(
-		{ path: '/' },
+		{path: '/'},
 		'GET:http://localhost',
 	));
 // eslint-disable-next-line jest/expect-expect
@@ -260,26 +260,26 @@ test(
 	async () => testCacheKey(
 		{
 			path: '/?foo=bar',
-			query: { bar: 'baz' },
+			query: {bar: 'baz'},
 		},
 		'GET:http://localhost/?foo=bar',
 	));
 // eslint-disable-next-line jest/expect-expect
-test('auth should be in url', async () => testCacheKey({ auth: 'user:pass' }, 'GET:http://user:pass@localhost'));
+test('auth should be in url', async () => testCacheKey({auth: 'user:pass'}, 'GET:http://user:pass@localhost'));
 // eslint-disable-next-line jest/expect-expect
-test('should return default url', async () => testCacheKey({ method: 'POST' }, 'POST:http://localhost'));
+test('should return default url', async () => testCacheKey({method: 'POST'}, 'POST:http://localhost'));
 test('request options path query is passed through', async () => {
 	const cacheableRequest = CacheableRequest(request);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	const argString = `${s.url}/echo?foo=bar`;
-	const argURL = new url.URL(argString);
+	const argUrl = new url.URL(argString);
 	const urlObject = url.parse(argString);
 	const argOptions = {
 		hostname: urlObject.hostname,
 		port: urlObject.port,
 		path: urlObject.path,
 	};
-	const inputs = [argString, argURL, argOptions];
+	const inputs = [argString, argUrl, argOptions];
 	for (const input of inputs) {
 		// eslint-disable-next-line no-await-in-loop
 		const response: any = await cacheableRequestHelper(input);
@@ -299,7 +299,7 @@ test('Setting opts.cache to false bypasses cache for a single request', async ()
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	const options = url.parse(s.url + endpoint);
-	const optionsNoCache = { cache: false, ...options };
+	const optionsNoCache = {cache: false, ...options};
 	const firstResponse: any = await cacheableRequestHelper(options);
 	const secondResponse: any = await cacheableRequestHelper(options);
 	const thirdResponse: any = await cacheableRequestHelper(optionsNoCache);
@@ -324,7 +324,7 @@ test('TTL is passed to cache', async () => {
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const options = { strictTtl: true, ...url.parse(s.url + endpoint) };
+	const options = {strictTtl: true, ...url.parse(s.url + endpoint)};
 	await cacheableRequestHelper(options);
 });
 test('TTL is not passed to cache if strictTtl is false', async () => {
@@ -341,7 +341,7 @@ test('TTL is not passed to cache if strictTtl is false', async () => {
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const options = { strictTtl: false, ...url.parse(s.url + endpoint) };
+	const options = {strictTtl: false, ...url.parse(s.url + endpoint)};
 	await cacheableRequestHelper(options);
 });
 test('Setting opts.maxTtl will limit the TTL', async () => {
@@ -499,7 +499,7 @@ test('Keyv cache adapters load via connection uri', async () => {
 	);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	const db = new sqlite3.Database('test/testdb.sqlite');
-	const query = await pify(db.all.bind(db));
+	const query = pify(db.all.bind(db));
 	const firstResponse: any = await cacheableRequestHelper(s.url + endpoint);
 	await delay(1000);
 	const secondResponse: any = await cacheableRequestHelper(s.url + endpoint);

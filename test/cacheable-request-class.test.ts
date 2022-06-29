@@ -1,4 +1,4 @@
-import { request } from 'node:http';
+import {request} from 'node:http';
 import Keyv from 'keyv';
 import CacheableRequest from '../src/index.js';
 

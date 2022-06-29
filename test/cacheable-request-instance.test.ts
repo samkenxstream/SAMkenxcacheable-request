@@ -1,12 +1,10 @@
 import EventEmitter from 'node:events';
-import { request } from 'node:http';
+import {request} from 'node:http';
 import stream from 'node:stream';
 import url from 'node:url';
 import createTestServer from 'create-test-server';
 import getStream from 'get-stream';
 import CacheableRequest from '../src/index.js';
-
-const { PassThrough } = stream;
 
 let s: any;
 beforeAll(async () => {
@@ -71,7 +69,7 @@ test('cacheableRequest emits response event for network responses', () => {
 test('cacheableRequest emits response event for cached responses', () => {
 	const cacheableRequest = CacheableRequest(request);
 	const cache = new Map();
-	const options = Object.assign(url.parse(s.url), { cache });
+	const options = Object.assign(url.parse(s.url), {cache});
 	cacheableRequest(options, () => {
 		// This needs to happen in next tick so cache entry has time to be stored
 		setImmediate(() => {
@@ -170,7 +168,7 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 test('cacheableRequest emits RequestError if request function throws', done => { // eslint-disable-line jest/no-done-callback
 	const cacheableRequest = CacheableRequest(request);
 	const options: any = url.parse(s.url);
-	options.headers = { invalid: '💣' };
+	options.headers = {invalid: '💣'};
 	cacheableRequest(options)
 		.on('error', (error: any) => {
 			expect(error instanceof CacheableRequest.RequestError).toBeTruthy();
@@ -181,7 +179,7 @@ test('cacheableRequest emits RequestError if request function throws', done => {
 test('cacheableRequest does not cache response if request is aborted before receiving first byte of response', done => { // eslint-disable-line jest/no-done-callback
 	/* eslint-disable max-nested-callbacks */
 
-	createTestServer().then(s => {
+	void createTestServer().then(s => {
 		s.get('/delay-start', (request_: any, response_: any) => {
 			setTimeout(() => {
 				response_.setHeader('cache-control', 'max-age=60');
@@ -194,7 +192,7 @@ test('cacheableRequest does not cache response if request is aborted before rece
 		cacheableRequest(options)
 			.on('request', (request_: any) => {
 				request_.end();
-				setTimeout(() => {}, 20);
+				setTimeout(() => { /* do nothing */}, 20);
 				setTimeout(() => {
 					cacheableRequest(options, async (response: any) => {
 						request_.abort();
@@ -212,7 +210,7 @@ test('cacheableRequest does not cache response if request is aborted before rece
 test('cacheableRequest does not cache response if request is aborted after receiving part of the response', done => { // eslint-disable-line jest/no-done-callback
 	/* eslint-disable max-nested-callbacks */
 
-	createTestServer().then(s => {
+	void createTestServer().then(s => {
 		s.get('/delay-partial', (request_, response_) => {
 			response_.setHeader('cache-control', 'max-age=60');
 			response_.write('h');
@@ -248,7 +246,7 @@ test('cacheableRequest makes request even if initial DB connection fails (when o
 	cacheableRequest(options, (response_: any) => {
 		expect(response_.statusCode).toBe(200);
 	})
-		.on('error', () => {})
+		.on('error', () => {/* do nothing */})
 		.on('request', (request_: any) => request_.end());
 });
 test('cacheableRequest makes request even if current DB connection fails (when opts.automaticFailover is enabled)', async () => {
@@ -271,7 +269,7 @@ test('cacheableRequest makes request even if current DB connection fails (when o
 	cacheableRequest(options, (response_: any) => {
 		expect(response_.statusCode).toBe(200);
 	})
-		.on('error', () => {})
+		.on('error', () => {/* do nothing */})
 		.on('request', (request_: any) => request_.end());
 });
 test('cacheableRequest hashes request body as cache key', async () => {
@@ -279,8 +277,8 @@ test('cacheableRequest hashes request body as cache key', async () => {
 		get(k: string) {
 			expect(k.split(':').pop()).toBe('5d41402abc4b2a76b9719d911017c592');
 		},
-		set() {},
-		delete() {},
+		set() {/* do nothing */},
+		delete() {/* do nothing */},
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const options: any = url.parse(s.url);
@@ -289,7 +287,7 @@ test('cacheableRequest hashes request body as cache key', async () => {
 	cacheableRequest(options, (response_: any) => {
 		expect(response_.statusCode).toBe(201);
 	})
-		.on('error', () => {})
+		.on('error', () => {/* do nothing */})
 		.on('request', (request_: any) => request_.end());
 });
 test('cacheableRequest skips cache for streamed body', done => { // eslint-disable-line jest/no-done-callback
@@ -297,18 +295,18 @@ test('cacheableRequest skips cache for streamed body', done => { // eslint-disab
 		get() {
 			fail(new CacheableRequest.CacheError(new Error('Cache error'))); // eslint-disable-line jest/no-jasmine-globals
 		},
-		set() {},
-		delete() {},
+		set() {/* do nothing */},
+		delete() {/* do nothing */},
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const options: any = url.parse(s.url);
-	options.body = new PassThrough();
+	options.body = new stream.PassThrough();
 	options.method = 'POST';
 	cacheableRequest(options, (response_: any) => {
 		expect(response_.statusCode).toBe(201);
 		done();
 	})
-		.on('error', () => {})
+		.on('error', () => {/* do nothing */})
 		.on('request', (request_: any) => request_.end());
 	options.body.end('hello');
 });
