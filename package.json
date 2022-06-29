@@ -5,13 +5,14 @@
 	"license": "MIT",
 	"repository": "jaredwray/cacheable-request",
 	"author": "Jared Wray <me@jaredwray.com> (http://jaredwray.com)",
-	"main": "./dist/index.js",
+	"type": "module",
+	"exports": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"engines": {
 		"node": ">=14.16"
 	},
 	"scripts": {
-		"test": "xo && jest --coverage",
+		"test": "xo && NODE_OPTIONS=--experimental-vm-modules jest --coverage ",
 		"build": "tsc --project tsconfig.build.json",
 		"clean": "rm -rf node_modules && rm -rf ./coverage && rm -rf ./package-lock.json && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
 	},
@@ -34,13 +35,11 @@
 		"get-stream": "^6.0.1",
 		"http-cache-semantics": "^4.1.0",
 		"keyv": "^4.3.2",
-		"mimic-response": "^3.1.0",
-		"normalize-url": "^6.0.3",
+		"mimic-response": "^4.0.0",
+		"normalize-url": "^7.0.3",
 		"responselike": "^2.0.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.18.5",
-		"@babel/preset-env": "^7.18.2",
 		"@keyv/sqlite": "^3.5.2",
 		"@types/create-test-server": "^3.0.1",
 		"@types/delay": "^3.1.0",
@@ -52,20 +51,26 @@
 		"@types/responselike": "^1.0.0",
 		"@types/sqlite3": "^3.1.8",
 		"create-test-server": "3.0.1",
-		"eslint-plugin-jest": "^26.5.3",
 		"delay": "^5.0.0",
+		"eslint-plugin-jest": "^26.5.3",
 		"jest": "^28.1.1",
-		"pify": "^5.0.0",
+		"pify": "^6.0.0",
 		"sqlite3": "^5.0.8",
 		"ts-jest": "^28.0.5",
+		"ts-jest-resolver": "^2.0.0",
 		"ts-node": "^10.8.1",
 		"typescript": "^4.7.4",
 		"xo": "^0.50.0"
 	},
 	"jest": {
+		"extensionsToTreatAsEsm": [
+			".ts"
+		],
+		"resolver": "ts-jest-resolver",
 		"globals": {
 			"ts-jest": {
-				"tsconfig": "./tsconfig.json"
+				"tsconfig": "./tsconfig.build.json",
+				"useESM": true
 			}
 		},
 		"moduleFileExtensions": [
@@ -88,18 +93,13 @@
 			"plugin:jest/recommended"
 		],
 		"rules": {
-			"@typescript-eslint/object-curly-spacing": 0,
-			"@typescript-eslint/naming-convention": 0,
 			"@typescript-eslint/no-unsafe-assignment": 0,
 			"@typescript-eslint/no-unsafe-call": 0,
 			"@typescript-eslint/ban-types": 0,
 			"@typescript-eslint/restrict-template-expressions": 0,
 			"@typescript-eslint/no-unsafe-return": 0,
 			"new-cap": 0,
-			"@typescript-eslint/no-empty-function": 0,
-			"@typescript-eslint/restrict-plus-operands": 0,
-			"@typescript-eslint/no-floating-promises": 0,
-			"@typescript-eslint/await-thenable": 0
+			"@typescript-eslint/restrict-plus-operands": 0
 		}
 	}
 }
