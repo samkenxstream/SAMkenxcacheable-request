@@ -7,7 +7,7 @@ import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
 import pify from 'pify';
-import CacheableRequest from '../src/index'; // eslint-disable-line import/extensions
+import CacheableRequest from '../src/index.js';
 
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {

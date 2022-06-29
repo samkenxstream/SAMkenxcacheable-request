@@ -1,6 +1,6 @@
 import { request } from 'node:http';
 import Keyv from 'keyv';
-import CacheableRequest from '../src/index'; // eslint-disable-line import/extensions
+import CacheableRequest from '../src/index.js';
 
 test('CacheableRequest is a function', () => {
 	expect(typeof CacheableRequest).toBe('function');

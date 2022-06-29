@@ -4,7 +4,7 @@ import stream from 'node:stream';
 import url from 'node:url';
 import createTestServer from 'create-test-server';
 import getStream from 'get-stream';
-import CacheableRequest from '../src/index'; // eslint-disable-line import/extensions
+import CacheableRequest from '../src/index.js';
 
 const { PassThrough } = stream;
 
