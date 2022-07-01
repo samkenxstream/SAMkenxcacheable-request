@@ -13,7 +13,7 @@
 
 ## ESM Support in version 9 and higher. 
 
-We are now using pure esm support in our package. If you need to use commonjs you can use v8 or lower. To learn more about using ESM please read this from `sindresorhus` https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+We are now using pure esm support in our package. If you need to use commonjs you can use v8 or lower. To learn more about using ESM please read this from `sindresorhus`: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
 
 ## Features
