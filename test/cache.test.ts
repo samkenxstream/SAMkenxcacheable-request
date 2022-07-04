@@ -539,3 +539,16 @@ test('checks status codes when comparing cache & response', async () => {
 	expect(firstResponse.body).toBe('received 502');
 	expect(secondResponse.body).toBe('ok');
 });
+
+test('304 responses with forceRefresh do not clobber cache', async () => {
+	const endpoint = '/etag';
+	const cache = new Map();
+	const cacheableRequest = CacheableRequest(request, cache);
+	const cacheableRequestHelper = promisify(cacheableRequest);
+	const options = url.parse(s.url + endpoint);
+
+	const firstResponse: any = await cacheableRequestHelper(options);
+	const secondResponse: any = await cacheableRequestHelper({...options, forceRefresh: true});
+	expect(firstResponse.body).toBe('etag');
+	expect(secondResponse.body).toBe('etag');
+});
