@@ -88,7 +88,7 @@ function createCacheableRequest(request: Function, cache: any) {
 				};
 			});
 			const handler = (response: any) => {
-				if (revalidate && !options_.forceRefresh) {
+				if (revalidate) {
 					response.status = response.statusCode;
 					const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 					if (!revalidatedPolicy.modified) {
@@ -161,7 +161,7 @@ function createCacheableRequest(request: Function, cache: any) {
 			const get = async (options_: any) => {
 				await Promise.resolve();
 				const cacheEntry = options_.cache ? await cache.get(key) : undefined;
-				if (typeof cacheEntry === 'undefined') {
+				if (typeof cacheEntry === 'undefined' && !options_.forceRefresh) {
 					makeRequest(options_);
 					return;
 				}
