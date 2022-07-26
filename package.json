@@ -34,7 +34,7 @@
 	"dependencies": {
 		"get-stream": "^6.0.1",
 		"http-cache-semantics": "^4.1.0",
-		"keyv": "^4.3.2",
+		"keyv": "^4.3.3",
 		"mimic-response": "^4.0.0",
 		"normalize-url": "^7.0.3",
 		"responselike": "^2.0.0"
