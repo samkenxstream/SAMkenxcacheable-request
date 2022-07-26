@@ -37,7 +37,7 @@
 		"keyv": "^4.3.3",
 		"mimic-response": "^4.0.0",
 		"normalize-url": "^7.0.3",
-		"responselike": "^2.0.0"
+		"responselike": "^3.0.0"
 	},
 	"devDependencies": {
 		"@keyv/sqlite": "^3.5.3",

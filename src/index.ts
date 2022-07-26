@@ -92,8 +92,8 @@ function createCacheableRequest(request: Function, cache: any) {
 					response.status = response.statusCode;
 					const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 					if (!revalidatedPolicy.modified) {
-						const headers = revalidatedPolicy.policy.responseHeaders();
-						response = new Response(revalidate.statusCode, headers, revalidate.body, revalidate.url);
+						const headers = convertHeaders(revalidatedPolicy.policy.responseHeaders());
+						response = new Response({statusCode: revalidate.statusCode, headers, body: revalidate.body, url: revalidate.url});
 						response.cachePolicy = revalidatedPolicy.policy;
 						response.fromCache = true;
 					}
@@ -168,8 +168,8 @@ function createCacheableRequest(request: Function, cache: any) {
 
 				const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
 				if (policy.satisfiesWithoutRevalidation(options_) && !options_.forceRefresh) {
-					const headers = policy.responseHeaders();
-					const response: any = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
+					const headers = convertHeaders(policy.responseHeaders());
+					const response: any = new Response({statusCode: cacheEntry.statusCode, headers, body: cacheEntry.body, url: cacheEntry.url});
 					response.cachePolicy = policy;
 					response.fromCache = true;
 					ee.emit('response', response);
@@ -237,6 +237,15 @@ function normalizeUrlObject(url: any) {
 		pathname: url.pathname,
 		search: url.search,
 	};
+}
+
+function convertHeaders(headers: any) {
+	const result: any = {};
+	for (const name of Object.keys(headers)) {
+		result[name.toLowerCase()] = headers[name];
+	}
+
+	return result;
 }
 
 CacheableRequest.RequestError = class extends Error {
