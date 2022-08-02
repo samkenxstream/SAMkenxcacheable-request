@@ -468,23 +468,6 @@ test('Stale cache entries with Last-Modified headers are revalidated', async () 
 	expect(firstResponse.body).toBe(secondResponse.body);
 });
 
-test('Stale cache enteries with stale should throw error', async () => {
-	const endpoint = '/stale-error';
-	const cache = new Map();
-	const cacheableRequest = CacheableRequest(request, cache);
-	const cacheableRequestHelper = promisify(cacheableRequest);
-	const firstResponse: any = await cacheableRequestHelper(s.url + endpoint);
-	expect(firstResponse.statusCode).toBe(200);
-	expect(firstResponse.fromCache).toBeFalsy();
-	expect(firstResponse.body).toBe('fresh');
-	await delay(500);
-	const secondResponse: any = await cacheableRequestHelper(s.url + endpoint);
-	expect(cache.size).toBe(0);
-	expect(secondResponse.statusCode).toBe(500);
-	expect(secondResponse.fromCache).toBeFalsy();
-	expect(secondResponse.body).toBe('stale');
-});
-
 test('Stale cache enteries with stale-if-error-success should send response as expected', async () => {
 	const endpoint = '/stale-if-error-success';
 	const cache = new Map();
