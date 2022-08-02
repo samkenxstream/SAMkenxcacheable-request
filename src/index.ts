@@ -161,6 +161,7 @@ function createCacheableRequest(request: Function, cache: any) {
 			const get = async (options_: any) => {
 				await Promise.resolve();
 				const cacheEntry = options_.cache ? await cache.get(key) : undefined;
+
 				if (typeof cacheEntry === 'undefined' && !options_.forceRefresh) {
 					makeRequest(options_);
 					return;
@@ -176,6 +177,10 @@ function createCacheableRequest(request: Function, cache: any) {
 					if (typeof cb === 'function') {
 						cb(response);
 					}
+				} else if (policy.satisfiesWithoutRevalidation(options_) && Date.now() >= policy.timeToLive() && options_.forceRefresh) {
+					await cache.delete(key);
+					options_.headers = policy.revalidationHeaders(options_);
+					makeRequest(options_);
 				} else {
 					revalidate = cacheEntry;
 					options_.headers = policy.revalidationHeaders(options_);

@@ -12,6 +12,7 @@ import CacheableRequest from '../src/index.js';
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {
 	cacheableRequest(options, async (response: any) => {
+		console.log('test');
 		const body = await getStream(response);
 		response.body = body;
 		// Give the cache time to update
@@ -48,6 +49,51 @@ beforeAll(async () => {
 		}
 
 		response_.end(responseBody);
+	});
+	let date = Date.now() + 200;
+	s.get('/stale-revalidate', (request_: any, response_: any) => {
+		response_.setHeader('Cache-Control', 'public, max-age=0.05');
+		response_.setHeader('stale-if-error', '0.01');
+		if (Date.now() <= date) {
+			response_.statusCode = 200;
+			response_.end('fresh');
+		} else if (Date.now() <= date + 600) {
+			response_.statusCode = 200;
+			response_.end('stale');
+		} else {
+			response_.statusCode = 200;
+			response_.end('new');
+		}
+
+		response_.statusCode = 200;
+		response_.end('stale-revalidated');
+	});
+	date = Date.now() + 200;
+	s.get('/stale-if-error-success', (request_: any, response_: any) => {
+		response_.setHeader('Cache-Control', 'public, max-age=0.05');
+		response_.setHeader('stale-if-error', '0.01');
+		if (Date.now() <= date) {
+			response_.statusCode = 200;
+			response_.end('fresh');
+		} else if (Date.now() <= date + 600) {
+			response_.statusCode = 200;
+			response_.end('stale');
+		} else {
+			response_.statusCode = 200;
+			response_.end('new');
+		}
+	});
+	date = Date.now() + 200 + 300;
+	s.get('/stale-error', (request_: any, response_: any) => {
+		response_.setHeader('Cache-Control', 'public, max-age=0.05');
+		response_.setHeader('stale-if-error', '0.01');
+		if (Date.now() <= date) {
+			response_.statusCode = 200;
+			response_.end('fresh');
+		} else if (Date.now() <= date + 300) {
+			response_.statusCode = 500;
+			response_.end('stale');
+		}
 	});
 	let calledFirstError = false;
 	s.get('/first-error', (request_: any, response_: any) => {
@@ -420,6 +466,23 @@ test('Stale cache entries with Last-Modified headers are revalidated', async () 
 	expect(secondResponse.fromCache).toBeTruthy();
 	expect(firstResponse.body).toBe('last-modified');
 	expect(firstResponse.body).toBe(secondResponse.body);
+});
+
+test('Stale cache enteries with stale-if-error-success should send response as expected', async () => {
+	const endpoint = '/stale-if-error-success';
+	const cache = new Map();
+	const cacheableRequest = CacheableRequest(request, cache);
+	const cacheableRequestHelper = promisify(cacheableRequest);
+	const firstResponse: any = await cacheableRequestHelper(s.url + endpoint);
+	expect(firstResponse.statusCode).toBe(200);
+	expect(firstResponse.fromCache).toBeFalsy();
+	expect(firstResponse.body).toBe('new');
+	expect(cache.size).toBe(1);
+	await delay(500);
+	const secondResponse: any = await cacheableRequestHelper(s.url + endpoint);
+	expect(secondResponse.statusCode).toBe(200);
+	expect(secondResponse.fromCache).toBeFalsy();
+	expect(secondResponse.body).toBe('new');
 });
 test('Stale cache entries with ETag headers are revalidated', async () => {
 	const endpoint = '/etag';
