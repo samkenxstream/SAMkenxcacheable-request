@@ -12,7 +12,7 @@ import CacheableRequest from '../src/index.js';
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {
 	cacheableRequest(options, async (response: any) => {
-		console.log('test')
+		console.log('test');
 		const body = await getStream(response);
 		response.body = body;
 		// Give the cache time to update
@@ -54,7 +54,7 @@ beforeAll(async () => {
 	s.get('/stale-revalidate', (request_: any, response_: any) => {
 		response_.setHeader('Cache-Control', 'public, max-age=0.05');
 		response_.setHeader('stale-if-error', '0.01');
-		if(Date.now() <= date) {
+		if (Date.now() <= date) {
 			response_.statusCode = 200;
 			response_.end('fresh');
 		} else if (Date.now() <= date + 600) {
@@ -72,10 +72,10 @@ beforeAll(async () => {
 	s.get('/stale-if-error-success', (request_: any, response_: any) => {
 		response_.setHeader('Cache-Control', 'public, max-age=0.05');
 		response_.setHeader('stale-if-error', '0.01');
-		if(Date.now() <= date) {
+		if (Date.now() <= date) {
 			response_.statusCode = 200;
 			response_.end('fresh');
-		} else if(Date.now() <= date + 600) {
+		} else if (Date.now() <= date + 600) {
 			response_.statusCode = 200;
 			response_.end('stale');
 		} else {
@@ -87,10 +87,10 @@ beforeAll(async () => {
 	s.get('/stale-error', (request_: any, response_: any) => {
 		response_.setHeader('Cache-Control', 'public, max-age=0.05');
 		response_.setHeader('stale-if-error', '0.01');
-		if(Date.now() <= date){
+		if (Date.now() <= date) {
 			response_.statusCode = 200;
 			response_.end('fresh');
-		} else if(Date.now() <= date + 300) {
+		} else if (Date.now() <= date + 300) {
 			response_.statusCode = 500;
 			response_.end('stale');
 		}
@@ -485,7 +485,7 @@ test('Stale cache enteries with stale should throw error', async () => {
 	expect(secondResponse.body).toBe('stale');
 });
 
-test('Stale cache enteries with stale-if-error-success should send response as expected',async () => {
+test('Stale cache enteries with stale-if-error-success should send response as expected', async () => {
 	const endpoint = '/stale-if-error-success';
 	const cache = new Map();
 	const cacheableRequest = CacheableRequest(request, cache);
