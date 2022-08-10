@@ -12,7 +12,6 @@ import CacheableRequest from '../src/index.js';
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {
 	cacheableRequest(options, async (response: any) => {
-		console.log('test');
 		const body = await getStream(response);
 		response.body = body;
 		// Give the cache time to update
