@@ -9,6 +9,8 @@ import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
 
+const hooks = new Map<string, any>();
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const CacheableRequest = function (request: Function, cacheAdapter?: any) {
 	let cache: any = {};
@@ -126,6 +128,10 @@ function createCacheableRequest(request: Function, cache: any) {
 								ttl = ttl ? Math.min(ttl, options_.maxTtl) : options_.maxTtl;
 							}
 
+							if (hooks.size > 0) {
+								value.body = await CacheableRequest.runHook(value.body);
+							}
+
 							await cache.set(key, value, ttl);
 						} catch (error: unknown) {
 							ee.emit('error', new CacheableRequest.CacheError(error));
@@ -205,6 +211,26 @@ function createCacheableRequest(request: Function, cache: any) {
 		return ee;
 	};
 }
+
+CacheableRequest.addHook = (fn: Function) => {
+	if (!hooks.has('response')) {
+		hooks.set('response', fn);
+	}
+};
+
+CacheableRequest.removeHook = (name: string) => hooks.delete(name);
+
+CacheableRequest.getHook = (name: string) => hooks.get(name);
+
+CacheableRequest.runHook = async (response: any) => {
+	if (!response) {
+		return new CacheableRequest.CacheError(new Error('runHooks requires response argument'));
+	}
+
+	if (hooks.size > 0) {
+		return hooks.get('response')(response);
+	}
+};
 
 function cloneResponse(response: any) {
 	const clone = new PassThroughStream({autoDestroy: false});
