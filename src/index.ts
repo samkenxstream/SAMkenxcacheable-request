@@ -129,7 +129,11 @@ function createCacheableRequest(request: Function, cache: any) {
 							}
 
 							if (hooks.size > 0) {
-								value.body = await CacheableRequest.runHook(value.body);
+								/* eslint-disable no-await-in-loop */
+								for (const key_ of hooks.keys()) {
+									value.body = await CacheableRequest.runHook(key_, value.body);
+								}
+								/* eslint-enable no-await-in-loop */
 							}
 
 							await cache.set(key, value, ttl);
@@ -212,9 +216,9 @@ function createCacheableRequest(request: Function, cache: any) {
 	};
 }
 
-CacheableRequest.addHook = (fn: Function) => {
-	if (!hooks.has('response')) {
-		hooks.set('response', fn);
+CacheableRequest.addHook = (name: string, fn: Function) => {
+	if (!hooks.has(name)) {
+		hooks.set(name, fn);
 	}
 };
 
@@ -222,14 +226,12 @@ CacheableRequest.removeHook = (name: string) => hooks.delete(name);
 
 CacheableRequest.getHook = (name: string) => hooks.get(name);
 
-CacheableRequest.runHook = async (response: any) => {
+CacheableRequest.runHook = async (name: string, response: any) => {
 	if (!response) {
 		return new CacheableRequest.CacheError(new Error('runHooks requires response argument'));
 	}
 
-	if (hooks.size > 0) {
-		return hooks.get('response')(response);
-	}
+	return hooks.get(name)(response);
 };
 
 function cloneResponse(response: any) {

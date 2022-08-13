@@ -636,7 +636,7 @@ test('decompresses cached responses', async () => {
 	const endpoint = '/compress';
 	const cache = new Map();
 	const cacheableRequest = CacheableRequest(request, cache);
-	CacheableRequest.addHook(async (response: any) => {
+	CacheableRequest.addHook('response', async (response: any) => {
 		const buffer = await pm(gunzip)(response);
 		return buffer.toString();
 	});
