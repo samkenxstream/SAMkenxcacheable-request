@@ -1,6 +1,7 @@
 import {request} from 'node:http';
 import url from 'node:url';
-import util from 'node:util';
+import util, {promisify as pm} from 'node:util';
+import {gzip, gunzip} from 'node:zlib';
 import getStream from 'get-stream';
 import createTestServer from 'create-test-server';
 import delay from 'delay';
@@ -152,6 +153,22 @@ beforeAll(async () => {
 			originalUrl,
 			body,
 		});
+	});
+	const etag = 'foobar';
+
+	const payload = JSON.stringify({foo: 'bar'});
+	const compressed = await pm(gzip)(payload);
+
+	s.get('/compress', (request: any, response: any) => {
+		if (request.headers['if-none-match'] === etag) {
+			response.statusCode = 304;
+			response.end();
+		} else {
+			response.setHeader('content-encoding', 'gzip');
+			response.setHeader('cache-control', 'public, max-age: 60');
+			response.setHeader('etag', 'foobar');
+			response.end(compressed);
+		}
 	});
 });
 afterAll(async () => {
@@ -613,4 +630,20 @@ test('304 responses with forceRefresh do not clobber cache', async () => {
 	const secondResponse: any = await cacheableRequestHelper({...options, forceRefresh: true});
 	expect(firstResponse.body).toBe('etag');
 	expect(secondResponse.body).toBe('etag');
+});
+
+test('decompresses cached responses', async () => {
+	const endpoint = '/compress';
+	const cache = new Map();
+	const cacheableRequest = CacheableRequest(request, cache);
+	CacheableRequest.addHook('response', async (response: any) => {
+		const buffer = await pm(gunzip)(response);
+		return buffer.toString();
+	});
+	const cacheableRequestHelper = promisify(cacheableRequest);
+	const response: any = await cacheableRequestHelper(s.url + endpoint);
+	expect(response.statusCode).toBe(200);
+	const iterator = cache.values();
+	const {value} = JSON.parse(iterator.next().value);
+	expect(value.body).toBe('{"foo":"bar"}');
 });

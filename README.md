@@ -204,6 +204,27 @@ cacheableRequest('example.com', cb)
   });
 ```
 
+## Add Hooks
+
+The hook will pre compute response right before saving it in cache. You can include many hooks and it will run in order you add hook on response object.
+
+```js
+CacheableRequest.addHook('response', async (response: any) => {
+  const buffer = await pm(gunzip)(response);
+  return buffer.toString();
+});
+
+const cacheableRequest = CacheableRequest(request, cache);
+```
+
+## Remove Hooks
+
+You can also remove hook by using below
+
+```js
+CacheableRequest.removeHook('response');
+```
+
 **Note:** Database connection errors are emitted here, however `cacheable-request` will attempt to re-request the resource and bypass the cache on a connection error. Therefore a database connection error doesn't necessarily mean the request won't be fulfilled.
 
 ## License
