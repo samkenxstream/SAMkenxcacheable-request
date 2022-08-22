@@ -209,12 +209,16 @@ cacheableRequest('example.com', cb)
 The hook will pre compute response right before saving it in cache. You can include many hooks and it will run in order you add hook on response object.
 
 ```js
-CacheableRequest.addHook('response', async (response: any) => {
-  const buffer = await pm(gunzip)(response);
-  return buffer.toString();
-});
+const hooks = {
+		beforeCache: async (response: any) {
+			const buffer = await pm(gunzip)(response);
+			return buffer.toString();
+		},
+	};
 
 const cacheableRequest = CacheableRequest(request, cache);
+const cacheReq = cacheableRequest({hooks, url: 'http://example.com'}, cb);
+
 ```
 
 ## Remove Hooks

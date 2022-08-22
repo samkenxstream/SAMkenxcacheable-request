@@ -9,8 +9,6 @@ import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
 
-const hooks = new Map<string, any>();
-
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const CacheableRequest = function (request: Function, cacheAdapter?: any) {
 	let cache: any = {};
@@ -41,7 +39,7 @@ function createCacheableRequest(request: Function, cache: any) {
 			const search = searchParts.length > 0
 				? `?${searchParts.join('?')}`
 				: '';
-			url = normalizeUrlObject({...options, pathname, search});
+			url = options.url ? normalizeUrlObject(urlLib.parse(options.url)) : normalizeUrlObject({...options, pathname, search});
 		}
 
 		options = {
@@ -95,7 +93,7 @@ function createCacheableRequest(request: Function, cache: any) {
 					const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 					if (!revalidatedPolicy.modified) {
 						const headers = convertHeaders(revalidatedPolicy.policy.responseHeaders());
-						response = new Response({statusCode: revalidate.statusCode, headers, body: revalidate.body, url: revalidate.url});
+						response = new Response(revalidate.statusCode, headers, revalidate.body, revalidate.url);
 						response.cachePolicy = revalidatedPolicy.policy;
 						response.fromCache = true;
 					}
@@ -128,10 +126,10 @@ function createCacheableRequest(request: Function, cache: any) {
 								ttl = ttl ? Math.min(ttl, options_.maxTtl) : options_.maxTtl;
 							}
 
-							if (hooks.size > 0) {
+							if (options.hooks) {
 								/* eslint-disable no-await-in-loop */
-								for (const key_ of hooks.keys()) {
-									value.body = await CacheableRequest.runHook(key_, value.body);
+								for (const key of Object.keys(options.hooks)) {
+									value.body = await options.hooks[key](value.body);
 								}
 								/* eslint-enable no-await-in-loop */
 							}
@@ -180,7 +178,7 @@ function createCacheableRequest(request: Function, cache: any) {
 				const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
 				if (policy.satisfiesWithoutRevalidation(options_) && !options_.forceRefresh) {
 					const headers = convertHeaders(policy.responseHeaders());
-					const response: any = new Response({statusCode: cacheEntry.statusCode, headers, body: cacheEntry.body, url: cacheEntry.url});
+					const response: any = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
 					response.cachePolicy = policy;
 					response.fromCache = true;
 					ee.emit('response', response);
@@ -215,24 +213,6 @@ function createCacheableRequest(request: Function, cache: any) {
 		return ee;
 	};
 }
-
-CacheableRequest.addHook = (name: string, fn: Function) => {
-	if (!hooks.has(name)) {
-		hooks.set(name, fn);
-	}
-};
-
-CacheableRequest.removeHook = (name: string) => hooks.delete(name);
-
-CacheableRequest.getHook = (name: string) => hooks.get(name);
-
-CacheableRequest.runHook = async (name: string, response: any) => {
-	if (!response) {
-		return new CacheableRequest.CacheError(new Error('runHooks requires response argument'));
-	}
-
-	return hooks.get(name)(response);
-};
 
 function cloneResponse(response: any) {
 	const clone = new PassThroughStream({autoDestroy: false});

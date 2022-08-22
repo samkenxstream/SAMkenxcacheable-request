@@ -632,16 +632,21 @@ test('304 responses with forceRefresh do not clobber cache', async () => {
 	expect(secondResponse.body).toBe('etag');
 });
 
-test('decompresses cached responses', async () => {
+test('hooks should return cached responses', async () => {
 	const endpoint = '/compress';
 	const cache = new Map();
 	const cacheableRequest = CacheableRequest(request, cache);
-	CacheableRequest.addHook('response', async (response: any) => {
-		const buffer = await pm(gunzip)(response);
-		return buffer.toString();
-	});
+	const hooks = {
+		async afterCache(response: any) {
+			return response;
+		},
+		async beforeCache(response: any) {
+			const buffer = await pm(gunzip)(response);
+			return buffer.toString();
+		},
+	};
 	const cacheableRequestHelper = promisify(cacheableRequest);
-	const response: any = await cacheableRequestHelper(s.url + endpoint);
+	const response: any = await cacheableRequestHelper({hooks, url: s.url + endpoint});
 	expect(response.statusCode).toBe(200);
 	const iterator = cache.values();
 	const {value} = JSON.parse(iterator.next().value);
