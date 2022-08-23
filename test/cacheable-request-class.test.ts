@@ -5,9 +5,6 @@ import CacheableRequest from '../src/index.js';
 test('CacheableRequest is a function', () => {
 	expect(typeof CacheableRequest).toBe('function');
 });
-test('CacheableRequest cannot be invoked without \'new\'', () => {
-	expect(() => CacheableRequest(request, {})).not.toThrow();
-});
 test('CacheableRequest accepts Keyv instance', () => {
 	expect(() => CacheableRequest(request, new Keyv())).not.toThrow();
 });

@@ -69,7 +69,8 @@ test('cacheableRequest emits response event for network responses', () => {
 test('cacheableRequest emits response event for cached responses', () => {
 	const cacheableRequest = CacheableRequest(request);
 	const cache = new Map();
-	const options = Object.assign(url.parse(s.url), {cache});
+	const url = s.url;
+	const options = Object.assign(url, {cache});
 	cacheableRequest(options, () => {
 		// This needs to happen in next tick so cache entry has time to be stored
 		setImmediate(() => {
@@ -103,6 +104,7 @@ test('cacheableRequest emits CacheError if cache.get errors', async () => {
 		},
 		set: store.set.bind(store),
 		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	cacheableRequest(url.parse(s.url))
@@ -121,6 +123,7 @@ test('cacheableRequest emits CacheError if cache.set errors', () => {
 			throw new Error(errorMessage);
 		},
 		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	cacheableRequest(url.parse(s.url))
@@ -139,6 +142,7 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 		delete() {
 			throw new Error(errorMessage);
 		},
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	(async () => {
@@ -150,10 +154,11 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 			response_.setHeader('Cache-Control', cc);
 			response_.end('hi');
 		});
-		cacheableRequest(s.url, () => {
+		let url = s.url || '';
+		cacheableRequest({url}, () => {
 			// This needs to happen in next tick so cache entry has time to be stored
 			setImmediate(() => {
-				cacheableRequest(s.url)
+				cacheableRequest({url})
 					.on('error', async (error: any) => {
 						expect(error instanceof CacheableRequest.CacheError).toBeTruthy();
 						expect(error.message).toBe(errorMessage);
@@ -261,6 +266,9 @@ test('cacheableRequest makes request even if current DB connection fails (when o
 		delete() {
 			throw new Error();
 		},
+		clear() {
+			throw new Error();
+		},
 	};
 	/* eslint-enable unicorn/error-message */
 	const cacheableRequest = CacheableRequest(request, cache);
@@ -277,8 +285,11 @@ test('cacheableRequest hashes request body as cache key', async () => {
 		get(k: string) {
 			expect(k.split(':').pop()).toBe('5d41402abc4b2a76b9719d911017c592');
 		},
-		set() {/* do nothing */},
-		delete() {/* do nothing */},
+		set() {throw new Error();},
+		delete() {throw new Error();},
+		clear() {
+			throw new Error();
+		},
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const options: any = url.parse(s.url);
@@ -295,8 +306,11 @@ test('cacheableRequest skips cache for streamed body', done => { // eslint-disab
 		get() {
 			fail(new CacheableRequest.CacheError(new Error('Cache error'))); // eslint-disable-line jest/no-jasmine-globals
 		},
-		set() {/* do nothing */},
-		delete() {/* do nothing */},
+		set() {throw new Error();},
+		delete() {throw new Error();},
+		clear() {
+			throw new Error();
+		},
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const options: any = url.parse(s.url);

@@ -6,7 +6,7 @@ import getStream from 'get-stream';
 import createTestServer from 'create-test-server';
 import delay from 'delay';
 import sqlite3 from 'sqlite3';
-import Keyv from 'keyv';
+import Keyv, { Store } from 'keyv';
 import pify from 'pify';
 import CacheableRequest from '../src/index.js';
 
@@ -213,11 +213,18 @@ test('Cacheable responses have unique cache key', async () => {
 const testCacheKey = async (input: any, expected: string) => {
 	const expectKey = `cacheable-request:${expected}`;
 	const okMessage = `OK ${expectKey}`;
+	const store = new Map();
 	const cache = {
 		get(key: string) {
 			expect(key).toBe(expectKey);
 			throw new Error(okMessage);
 		},
+		set(key: any, value: any, ttl: number) {
+			expect(ttl).toBe(1000);
+			return store.set(key, value);
+		},
+		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
@@ -383,6 +390,7 @@ test('TTL is passed to cache', async () => {
 			return store.set(key, value);
 		},
 		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
@@ -400,6 +408,7 @@ test('TTL is not passed to cache if strictTtl is false', async () => {
 			return store.set(key, value);
 		},
 		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
@@ -417,6 +426,7 @@ test('Setting opts.maxTtl will limit the TTL', async () => {
 			return store.set(key, value);
 		},
 		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
@@ -437,6 +447,7 @@ test('Setting opts.maxTtl when opts.strictTtl is true will use opts.maxTtl if it
 			return store.set(key, value);
 		},
 		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
@@ -458,6 +469,7 @@ test('Setting opts.maxTtl when opts.strictTtl is true will use remote TTL if it\
 			return store.set(key, value);
 		},
 		delete: store.delete.bind(store),
+		clear: store.clear.bind(store)
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
@@ -557,7 +569,7 @@ test('Undefined callback parameter inside cache logic is handled', async () => {
 	const cacheableRequest = CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest);
 	await cacheableRequestHelper(s.url + endpoint);
-	cacheableRequest(s.url + endpoint, undefined);
+	cacheableRequest({url: s.url + endpoint}, undefined);
 	await delay(500);
 	expect(true).toBeTruthy();
 });
