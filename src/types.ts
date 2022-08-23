@@ -22,16 +22,16 @@ export type CacheableRequestFunction = (
 ) => EventEmitter;
 
 interface CacheableRequest {
-	new (requestFn: RequestFn, storageAdapter?: string | CacheableRequest.StorageAdapter): CacheableRequestFunction;
-
 	RequestError: typeof RequestErrorCls;
 	CacheError: typeof CacheErrorCls;
+
+	new (requestFn: RequestFn, storageAdapter?: string | CacheableRequest.StorageAdapter): CacheableRequestFunction;
 }
 
 namespace CacheableRequest {
-    export type StorageAdapter = Store<any>;
+	export type StorageAdapter = Store<any>;
 
-    export interface Options {
+	export interface Options {
     	/**
          * If the cache should be used. Setting this to `false` will completely bypass the cache for the current request.
          * @default true
@@ -67,16 +67,16 @@ namespace CacheableRequest {
          */
     	forceRefresh?: boolean | undefined;
 
-     url?: string | undefined;
+		url?: string | undefined;
 
-     headers?: any;
+		headers?: any;
 
-     hooks?: any;
+		hooks?: any;
 
-     body?: any;
-    }
+		body?: any;
+	}
 
-    export interface Emitter extends EventEmitter {
+	export interface Emitter extends EventEmitter {
     	addListener(event: 'request', listener: (request: ClientRequest) => void): this;
     	addListener(
     		event: 'response',
@@ -125,10 +125,10 @@ namespace CacheableRequest {
     	emit(event: 'error', error: RequestError | CacheError): boolean;
     	eventNames(): Array<'request' | 'response' | 'error'>;
     	listenerCount(type: 'request' | 'response' | 'error'): number;
-    }
+	}
 
-    export type RequestError = RequestErrorCls;
-    export type CacheError = CacheErrorCls;
+	export type RequestError = RequestErrorCls;
+	export type CacheError = CacheErrorCls;
 }
 
 declare class RequestErrorCls extends Error {

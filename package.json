@@ -12,7 +12,7 @@
 		"node": ">=14.16"
 	},
 	"scripts": {
-		"test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage ",
+		"test": "xo && NODE_OPTIONS=--experimental-vm-modules jest --coverage ",
 		"build": "tsc --project tsconfig.build.json",
 		"clean": "rm -rf node_modules && rm -rf ./coverage && rm -rf ./package-lock.json && rm -rf ./test/testdb.sqlite && rm -rf ./dist"
 	},
@@ -93,7 +93,10 @@
 			"plugin:jest/recommended"
 		],
 		"rules": {
+			"@typescript-eslint/triple-slash-reference": 0,
+			"@typescript-eslint/no-namespace":0,
 			"@typescript-eslint/no-unsafe-assignment": 0,
+			"no-mixed-spaces-and-tabs": 0,
 			"@typescript-eslint/no-unsafe-call": 0,
 			"@typescript-eslint/ban-types": 0,
 			"@typescript-eslint/restrict-template-expressions": 0,

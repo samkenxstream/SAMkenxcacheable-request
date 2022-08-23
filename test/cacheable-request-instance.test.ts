@@ -69,7 +69,7 @@ test('cacheableRequest emits response event for network responses', () => {
 test('cacheableRequest emits response event for cached responses', () => {
 	const cacheableRequest = CacheableRequest(request);
 	const cache = new Map();
-	const url = s.url;
+	const {url} = s;
 	const options = Object.assign(url, {cache});
 	cacheableRequest(options, () => {
 		// This needs to happen in next tick so cache entry has time to be stored
@@ -104,7 +104,7 @@ test('cacheableRequest emits CacheError if cache.get errors', async () => {
 		},
 		set: store.set.bind(store),
 		delete: store.delete.bind(store),
-		clear: store.clear.bind(store)
+		clear: store.clear.bind(store),
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	cacheableRequest(url.parse(s.url))
@@ -123,7 +123,7 @@ test('cacheableRequest emits CacheError if cache.set errors', () => {
 			throw new Error(errorMessage);
 		},
 		delete: store.delete.bind(store),
-		clear: store.clear.bind(store)
+		clear: store.clear.bind(store),
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	cacheableRequest(url.parse(s.url))
@@ -142,7 +142,7 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 		delete() {
 			throw new Error(errorMessage);
 		},
-		clear: store.clear.bind(store)
+		clear: store.clear.bind(store),
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
 	(async () => {
@@ -154,11 +154,10 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 			response_.setHeader('Cache-Control', cc);
 			response_.end('hi');
 		});
-		let url = s.url || '';
-		cacheableRequest({url}, () => {
+		cacheableRequest({url: s.url}, () => {
 			// This needs to happen in next tick so cache entry has time to be stored
 			setImmediate(() => {
-				cacheableRequest({url})
+				cacheableRequest({url: s.url})
 					.on('error', async (error: any) => {
 						expect(error instanceof CacheableRequest.CacheError).toBeTruthy();
 						expect(error.message).toBe(errorMessage);
@@ -285,10 +284,14 @@ test('cacheableRequest hashes request body as cache key', async () => {
 		get(k: string) {
 			expect(k.split(':').pop()).toBe('5d41402abc4b2a76b9719d911017c592');
 		},
-		set() {throw new Error();},
-		delete() {throw new Error();},
+		set() {
+			throw new Error('cant set');
+		},
+		delete() {
+			throw new Error('cant delete');
+		},
 		clear() {
-			throw new Error();
+			throw new Error('cant clear');
 		},
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
@@ -306,10 +309,14 @@ test('cacheableRequest skips cache for streamed body', done => { // eslint-disab
 		get() {
 			fail(new CacheableRequest.CacheError(new Error('Cache error'))); // eslint-disable-line jest/no-jasmine-globals
 		},
-		set() {throw new Error();},
-		delete() {throw new Error();},
+		set() {
+			throw new Error('cant set');
+		},
+		delete() {
+			throw new Error('cant delete');
+		},
 		clear() {
-			throw new Error();
+			throw new Error('cant clear');
 		},
 	};
 	const cacheableRequest = CacheableRequest(request, cache);
