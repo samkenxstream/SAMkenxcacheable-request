@@ -11,6 +11,8 @@ import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
 import CacheableRequests, {CacheableRequestFunction, RequestFn} from './types.js';
 
+type Func = (...args: any[]) => void;
+
 class CacheableRequest {
 	/* eslint-disable-next-line @typescript-eslint/naming-convention */
 	static CacheError = class extends Error {
@@ -243,7 +245,7 @@ class CacheableRequest {
 		return ee;
 	};
 
-	addHook = (name: string, fn: Function) => {
+	addHook = (name: string, fn: Func) => {
 		if (!this.hooks.has(name)) {
 			this.hooks.set(name, fn);
 		}
