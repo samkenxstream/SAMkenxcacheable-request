@@ -2,7 +2,7 @@ import EventEmitter from 'node:events';
 import urlLib from 'node:url';
 import crypto from 'node:crypto';
 import stream, {PassThrough as PassThroughStream} from 'node:stream';
-import {ClientRequest, RequestOptions, ServerResponse} from 'node:http';
+import {ClientRequest, RequestOptions, ServerResponse, IncomingMessage} from 'node:http';
 import normalizeUrl from 'normalize-url';
 import getStream from 'get-stream';
 import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantics';
@@ -264,7 +264,7 @@ class CacheableRequest {
 	};
 }
 
-const cloneResponse = (response: any) => {
+const cloneResponse = (response:  IncomingMessage) => {
 	const clone = new PassThroughStream({autoDestroy: false});
 	mimicResponse(response, clone);
 
