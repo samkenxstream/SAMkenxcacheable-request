@@ -119,7 +119,7 @@ class CacheableRequest {
 					const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 					if (!revalidatedPolicy.modified) {
 						const headers = convertHeaders(revalidatedPolicy.policy.responseHeaders());
-						response = new Response({status: revalidate.statusCode, headers, body: revalidate.body, url: revalidate.url});
+						response = new Response({statusCode: revalidate.statusCode, headers, body: revalidate.body, url: revalidate.url});
 						response.cachePolicy = revalidatedPolicy.policy;
 						response.fromCache = true;
 					}
@@ -204,7 +204,7 @@ class CacheableRequest {
 				const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
 				if (policy.satisfiesWithoutRevalidation(options_) && !options_.forceRefresh) {
 					const headers = convertHeaders(policy.responseHeaders());
-					const response: any = new Response({status: cacheEntry.statusCode, headers, body: cacheEntry.body, url: cacheEntry.url});
+					const response: any = new Response({statusCode: cacheEntry.statusCode, headers, body: cacheEntry.body, url: cacheEntry.url});
 					response.cachePolicy = policy;
 					response.fromCache = true;
 					ee.emit('response', response);
