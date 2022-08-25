@@ -9,30 +9,48 @@ import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantic
 import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
-import CacheableRequest, {CacheableRequestFunction, RequestFn} from './types.js';
+import CacheableRequests, {CacheableRequestFunction, RequestFn} from './types.js';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const CacheableRequests = (request: RequestFn, cacheAdapter?: CacheableRequest.StorageAdapter | string): CacheableRequestFunction => {
-	let cache: CacheableRequest.StorageAdapter;
-	if (cacheAdapter instanceof Keyv) {
-		cache = cacheAdapter;
-	} else if (typeof cacheAdapter === 'string') {
-		cache = new Keyv({
-			uri: cacheAdapter,
-			namespace: 'cacheable-request',
-		});
-	} else {
-		cache = new Keyv({
-			store: cacheAdapter,
-			namespace: 'cacheable-request',
-		});
+class CacheableRequest {
+	/* eslint-disable-next-line @typescript-eslint/naming-convention */
+	static CacheError = class extends Error {
+		constructor(error: any) {
+			super(error.message);
+			Object.assign(this, error);
+		}
+	};
+
+	/* eslint-disable-next-line @typescript-eslint/naming-convention */
+	static RequestError = class extends Error {
+		constructor(error: any) {
+			super(error.message);
+			Object.assign(this, error);
+		}
+	};
+
+	cache: CacheableRequests.StorageAdapter;
+	request: RequestFn;
+	hooks: Map<string, any> = new Map<string, any>();
+	constructor(request: RequestFn, cacheAdapter?: CacheableRequests.StorageAdapter | string) {
+		if (cacheAdapter instanceof Keyv) {
+			this.cache = cacheAdapter;
+		} else if (typeof cacheAdapter === 'string') {
+			this.cache = new Keyv({
+				uri: cacheAdapter,
+				namespace: 'cacheable-request',
+			});
+		} else {
+			this.cache = new Keyv({
+				store: cacheAdapter,
+				namespace: 'cacheable-request',
+			});
+		}
+
+		this.createCacheableRequest = this.createCacheableRequest.bind(this);
+		this.request = request;
 	}
 
-	return createCacheableRequest(request, cache);
-};
-
-function createCacheableRequest(request: RequestFn, cache: any) {
-	return (options: (CacheableRequest.Options & RequestOptions),
+	createCacheableRequest = () => (options: (CacheableRequests.Options & RequestOptions & CacheSemanticsOptions) | string | URL,
 		cb?: (response: ServerResponse | Response) => void): EventEmitter => {
 		let url;
 		if (typeof options === 'string') {
@@ -46,7 +64,7 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 			const search = searchParts.length > 0
 				? `?${searchParts.join('?')}`
 				: '';
-			url = options.url ? normalizeUrlObject(urlLib.parse(options.url)) : normalizeUrlObject({...options, pathname, search});
+			url = normalizeUrlObject({...options, pathname, search});
 		}
 
 		options = {
@@ -101,7 +119,7 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 					const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 					if (!revalidatedPolicy.modified) {
 						const headers = convertHeaders(revalidatedPolicy.policy.responseHeaders());
-						response = new Response({statusCode: revalidate.statusCode, headers, body: revalidate.body, url: revalidate.url});
+						response = new Response(revalidate.statusCode, headers, revalidate.body, revalidate.url);
 						response.cachePolicy = revalidatedPolicy.policy;
 						response.fromCache = true;
 					}
@@ -134,25 +152,25 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 								ttl = ttl ? Math.min(ttl, options_.maxTtl) : options_.maxTtl;
 							}
 
-							if (options.hooks) {
+							if (this.hooks.size > 0) {
 								/* eslint-disable no-await-in-loop */
-								for (const key of Object.keys(options.hooks)) {
-									value.body = await options.hooks[key](value.body);
+								for (const key_ of this.hooks.keys()) {
+									value.body = await this.runHook(key_, value.body);
 								}
 								/* eslint-enable no-await-in-loop */
 							}
 
-							await cache.set(key, value, ttl);
+							await this.cache.set(key, value, ttl);
 						} catch (error: unknown) {
-							ee.emit('error', new CacheableRequests.CacheError(error));
+							ee.emit('error', new CacheableRequest.CacheError(error));
 						}
 					})();
 				} else if (options_.cache && revalidate) {
 					(async () => {
 						try {
-							await cache.delete(key);
+							await this.cache.delete(key);
 						} catch (error: unknown) {
-							ee.emit('error', new CacheableRequests.CacheError(error));
+							ee.emit('error', new CacheableRequest.CacheError(error));
 						}
 					})();
 				}
@@ -164,19 +182,19 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 			};
 
 			try {
-				const request_ = request(options_, handler);
+				const request_ = this.request(options_, handler);
 				request_.once('error', requestErrorCallback);
 				request_.once('abort', requestErrorCallback);
 				ee.emit('request', request_);
 			} catch (error: unknown) {
-				ee.emit('error', new CacheableRequests.RequestError(error));
+				ee.emit('error', new CacheableRequest.RequestError(error));
 			}
 		};
 
 		(async () => {
 			const get = async (options_: any) => {
 				await Promise.resolve();
-				const cacheEntry = options_.cache ? await cache.get(key) : undefined;
+				const cacheEntry = options_.cache ? await this.cache.get(key) : undefined;
 
 				if (typeof cacheEntry === 'undefined' && !options_.forceRefresh) {
 					makeRequest(options_);
@@ -186,7 +204,7 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 				const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
 				if (policy.satisfiesWithoutRevalidation(options_) && !options_.forceRefresh) {
 					const headers = convertHeaders(policy.responseHeaders());
-					const response: any = new Response({statusCode: cacheEntry.statusCode, headers, body: cacheEntry.body, url: cacheEntry.url});
+					const response: any = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
 					response.cachePolicy = policy;
 					response.fromCache = true;
 					ee.emit('response', response);
@@ -194,7 +212,7 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 						cb(response);
 					}
 				} else if (policy.satisfiesWithoutRevalidation(options_) && Date.now() >= policy.timeToLive() && options_.forceRefresh) {
-					await cache.delete(key);
+					await this.cache.delete(key);
 					options_.headers = policy.revalidationHeaders(options_);
 					makeRequest(options_);
 				} else {
@@ -204,9 +222,13 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 				}
 			};
 
-			const errorHandler = (error: any) => ee.emit('error', new CacheableRequests.CacheError(error));
-			cache.once('error', errorHandler);
-			ee.on('response', () => cache.removeListener('error', errorHandler));
+			const errorHandler = (error: any) => ee.emit('error', new CacheableRequest.CacheError(error));
+			if (this.cache instanceof Keyv) {
+				const cachek = this.cache;
+				cachek.once('error', errorHandler);
+				ee.on('error', () => cachek.removeListener('error', errorHandler));
+			}
+
 			try {
 				await get(options);
 			} catch (error: unknown) {
@@ -214,22 +236,40 @@ function createCacheableRequest(request: RequestFn, cache: any) {
 					makeRequest(options);
 				}
 
-				ee.emit('error', new CacheableRequests.CacheError(error));
+				ee.emit('error', new CacheableRequest.CacheError(error));
 			}
 		})();
 
 		return ee;
 	};
+
+	addHook = (name: string, fn: Function) => {
+		if (!this.hooks.has(name)) {
+			this.hooks.set(name, fn);
+		}
+	};
+
+	removeHook = (name: string) => this.hooks.delete(name);
+
+	getHook = (name: string) => this.hooks.get(name);
+
+	runHook = async (name: string, response: any) => {
+		if (!response) {
+			return new CacheableRequest.CacheError(new Error('runHooks requires response argument'));
+		}
+
+		return this.hooks.get(name)(response);
+	};
 }
 
-function cloneResponse(response: any) {
+const cloneResponse = (response: any) => {
 	const clone = new PassThroughStream({autoDestroy: false});
 	mimicResponse(response, clone);
 
 	return response.pipe(clone);
-}
+};
 
-function urlObjectToRequestOptions(url: any) {
+const urlObjectToRequestOptions = (url: any) => {
 	interface Option {
 		path: string;
 		pathname?: string;
@@ -240,9 +280,9 @@ function urlObjectToRequestOptions(url: any) {
 	delete options.pathname;
 	delete options.search;
 	return options;
-}
+};
 
-function normalizeUrlObject(url: any) {
+const normalizeUrlObject = (url: any) =>
 	// If url was parsed by url.parse or new URL:
 	// - hostname will be set
 	// - host will be hostname[:port]
@@ -250,36 +290,22 @@ function normalizeUrlObject(url: any) {
 	// Otherwise, url was from request options:
 	// - hostname or host may be set
 	// - host shall not have port encoded
-	return {
+	 ({
 		protocol: url.protocol,
 		auth: url.auth,
 		hostname: url.hostname || url.host || 'localhost',
 		port: url.port,
 		pathname: url.pathname,
 		search: url.search,
-	};
-}
+	});
 
-function convertHeaders(headers: any) {
+const convertHeaders = (headers: CachePolicy.Headers) => {
 	const result: any = {};
 	for (const name of Object.keys(headers)) {
 		result[name.toLowerCase()] = headers[name];
 	}
 
 	return result;
-}
-
-CacheableRequests.RequestError = class extends Error {
-	constructor(error: any) {
-		super(error.message);
-		Object.assign(this, error);
-	}
-};
-CacheableRequests.CacheError = class extends Error {
-	constructor(error: any) {
-		super(error.message);
-		Object.assign(this, error);
-	}
 };
 
-export default CacheableRequests;
+export default CacheableRequest;
