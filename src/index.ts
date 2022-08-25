@@ -177,9 +177,9 @@ class CacheableRequest {
 					})();
 				}
 
-				ee.emit('response', clonedResponse || response);
+				ee.emit('response', clonedResponse ?? response);
 				if (typeof cb === 'function') {
-					cb(clonedResponse || response);
+					cb(clonedResponse ?? response);
 				}
 			};
 
@@ -264,7 +264,7 @@ class CacheableRequest {
 	};
 }
 
-const cloneResponse = (response:  IncomingMessage) => {
+const cloneResponse = (response: IncomingMessage) => {
 	const clone = new PassThroughStream({autoDestroy: false});
 	mimicResponse(response, clone);
 
