@@ -224,7 +224,7 @@ class CacheableRequest {
 				}
 			};
 
-			const errorHandler = (error: any) => ee.emit('error', new CacheableRequest.CacheError(error));
+			const errorHandler = (error: Error) => ee.emit('error', new CacheableRequest.CacheError(error));
 			if (this.cache instanceof Keyv) {
 				const cachek = this.cache;
 				cachek.once('error', errorHandler);
