@@ -2,7 +2,7 @@ import EventEmitter from 'node:events';
 import urlLib from 'node:url';
 import crypto from 'node:crypto';
 import stream, {PassThrough as PassThroughStream} from 'node:stream';
-import {ClientRequest, RequestOptions, ServerResponse, IncomingMessage} from 'node:http';
+import {RequestOptions, ServerResponse, IncomingMessage} from 'node:http';
 import normalizeUrl from 'normalize-url';
 import getStream from 'get-stream';
 import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantics';
@@ -302,7 +302,8 @@ const normalizeUrlObject = (url: any) =>
 	});
 
 const convertHeaders = (headers: CachePolicy.Headers) => {
-	const result: any = [];
+	/* eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style */
+	const result: {[header: string]: string | string[] | undefined} = {};
 	for (const name of Object.keys(headers)) {
 		result[name.toLowerCase()] = headers[name];
 	}
