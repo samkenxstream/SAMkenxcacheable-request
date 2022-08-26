@@ -15,7 +15,6 @@ import {Options as CacheSemanticsOptions} from 'http-cache-semantics';
 import ResponseLike from 'responselike';
 
 export type RequestFn = typeof request;
-export type Headers = { [header: string]: string | string[] | undefined };
 
 export type CacheableRequestFunction = (
 	options: (CacheableRequest.Options & RequestOptions & CacheSemanticsOptions) | string | URL,

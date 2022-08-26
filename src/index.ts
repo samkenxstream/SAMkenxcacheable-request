@@ -9,7 +9,7 @@ import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantic
 import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
-import CacheableRequests, {CacheableRequestFunction, RequestFn, Headers} from './types.js';
+import CacheableRequests, {RequestFn} from './types.js';
 
 type Func = (...args: any[]) => void;
 
@@ -302,7 +302,7 @@ const normalizeUrlObject = (url: any) =>
 	});
 
 const convertHeaders = (headers: CachePolicy.Headers) => {
-	const result: Headers = {};
+	const result: any = [];
 	for (const name of Object.keys(headers)) {
 		result[name.toLowerCase()] = headers[name];
 	}
