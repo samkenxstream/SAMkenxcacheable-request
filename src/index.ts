@@ -302,8 +302,7 @@ const normalizeUrlObject = (url: any) =>
 	});
 
 const convertHeaders = (headers: CachePolicy.Headers) => {
-	/* eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style */
-	const result: {[header: string]: string | string[] | undefined} = {};
+	const result: any = [];
 	for (const name of Object.keys(headers)) {
 		result[name.toLowerCase()] = headers[name];
 	}
