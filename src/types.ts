@@ -10,6 +10,7 @@
 import {request, RequestOptions, ClientRequest, ServerResponse} from 'node:http';
 import {URL} from 'node:url';
 import {EventEmitter} from 'node:events';
+import {Buffer} from 'node:buffer';
 import {Store} from 'keyv';
 import {Options as CacheSemanticsOptions} from 'http-cache-semantics';
 import ResponseLike from 'responselike';
@@ -71,7 +72,7 @@ namespace CacheableRequest {
 
 		headers?: any;
 
-		body?: any;
+		body?: Buffer;
 	}
 
 	export interface Emitter extends EventEmitter {
