@@ -292,7 +292,7 @@ const normalizeUrlObject = (url: any) =>
 	// Otherwise, url was from request options:
 	// - hostname or host may be set
 	// - host shall not have port encoded
-	 ({
+	({
 		protocol: url.protocol,
 		auth: url.auth,
 		hostname: url.hostname || url.host || 'localhost',

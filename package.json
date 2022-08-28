@@ -96,7 +96,6 @@
 			"@typescript-eslint/triple-slash-reference": 0,
 			"@typescript-eslint/no-namespace":0,
 			"@typescript-eslint/no-unsafe-assignment": 0,
-			"no-mixed-spaces-and-tabs": 0,
 			"@typescript-eslint/no-unsafe-call": 0,
 			"@typescript-eslint/ban-types": 0,
 			"@typescript-eslint/restrict-template-expressions": 0,
