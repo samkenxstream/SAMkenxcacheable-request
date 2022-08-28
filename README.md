@@ -48,14 +48,14 @@ const req = http.request('http://example.com', cb);
 req.end();
 
 // You can do
-const cacheableRequest = new CacheableRequest(http.request);
+const cacheableRequest = new CacheableRequest(http.request).createCacheableRequest();
 const cacheReq = cacheableRequest('http://example.com', cb);
 cacheReq.on('request', req => req.end());
 // Future requests to 'example.com' will be returned from cache if still valid
 
 // You pass in any other http.request API compatible method to be wrapped with cache support:
-const cacheableRequest = new CacheableRequest(https.request);
-const cacheableRequest = new CacheableRequest(electron.net);
+const cacheableRequest = new CacheableRequest(https.request).createCacheableRequest();
+const cacheableRequest = new CacheableRequest(electron.net).createCacheableRequest();
 ```
 
 ## Storage Adapters
@@ -71,7 +71,7 @@ npm install @keyv/redis
 And then you can pass `CacheableRequest` your connection string:
 
 ```js
-const cacheableRequest = new CacheableRequest(http.request, 'redis://user:pass@localhost:6379');
+const cacheableRequest = new CacheableRequest(http.request, 'redis://user:pass@localhost:6379').createCacheableRequest();
 ```
 
 [View all official Keyv storage adapters.](https://github.com/jaredwray/keyv#official-storage-adapters)
@@ -88,7 +88,7 @@ const storageAdapter = require('./my-storage-adapter');
 const QuickLRU = require('quick-lru');
 const storageAdapter = new QuickLRU({ maxSize: 1000 });
 
-const cacheableRequest = new CacheableRequest(http.request, storageAdapter);
+const cacheableRequest = new CacheableRequest(http.request, storageAdapter).createCacheableRequest();
 ```
 
 View the [Keyv docs](https://github.com/jaredwray/keyv) for more information on how to use storage adapters.
@@ -209,7 +209,10 @@ cacheableRequest('example.com', cb)
 The hook will pre compute response right before saving it in cache. You can include many hooks and it will run in order you add hook on response object.
 
 ```js
-const cacheableRequest = new CacheableRequest(request, cache);
+import http from 'http';
+import CacheableRequest from 'cacheable-request';
+
+const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
 cacheableRequest.addHook('response', async (response: any) => {
   const buffer = await pm(gunzip)(response);
   return buffer.toString();
