@@ -11,7 +11,7 @@ import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
 import CacheableRequests, {RequestFn} from './types.js';
 
-type Func = (...args: any[]) => void;
+type Func = (...args: any[]) => any;
 
 class CacheableRequest {
 	/* eslint-disable-next-line @typescript-eslint/naming-convention */
