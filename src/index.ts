@@ -121,7 +121,7 @@ class CacheableRequest {
 					const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 					if (!revalidatedPolicy.modified) {
 						const headers = convertHeaders(revalidatedPolicy.policy.responseHeaders());
-						response = new Response({statusCode: revalidate.statusCode, headers, body: revalidate.body, url: revalidate.url});
+						response = new Response(revalidate.statusCode, headers, revalidate.body, revalidate.url);
 						response.cachePolicy = revalidatedPolicy.policy;
 						response.fromCache = true;
 					}
@@ -157,7 +157,7 @@ class CacheableRequest {
 							if (this.hooks.size > 0) {
 								/* eslint-disable no-await-in-loop */
 								for (const key_ of this.hooks.keys()) {
-									value.body = await this.runHook(key_, cloneResponse);
+									value.body = await this.runHook(key_, value.body);
 								}
 								/* eslint-enable no-await-in-loop */
 							}
@@ -206,7 +206,7 @@ class CacheableRequest {
 				const policy = CachePolicy.fromObject(cacheEntry.cachePolicy);
 				if (policy.satisfiesWithoutRevalidation(options_) && !options_.forceRefresh) {
 					const headers = convertHeaders(policy.responseHeaders());
-					const response: any = new Response({statusCode: cacheEntry.statusCode, headers, body: cacheEntry.body, url: cacheEntry.url});
+					const response: any = new Response(cacheEntry.statusCode, headers, cacheEntry.body, cacheEntry.url);
 					response.cachePolicy = policy;
 					response.fromCache = true;
 					ee.emit('response', response);
