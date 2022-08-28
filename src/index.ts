@@ -32,7 +32,7 @@ class CacheableRequest {
 
 	cache: CacheableRequests.StorageAdapter;
 	request: RequestFn;
-	hooks: Map<string, any> = new Map<string, any>();
+	hooks: Map<string, Func> = new Map<string, any>();
 	constructor(request: RequestFn, cacheAdapter?: CacheableRequests.StorageAdapter | string) {
 		if (cacheAdapter instanceof Keyv) {
 			this.cache = cacheAdapter;
@@ -157,7 +157,7 @@ class CacheableRequest {
 							if (this.hooks.size > 0) {
 								/* eslint-disable no-await-in-loop */
 								for (const key_ of this.hooks.keys()) {
-									value.body = await this.runHook(key_, value.body);
+									value.body = await this.runHook(key_, cloneResponse);
 								}
 								/* eslint-enable no-await-in-loop */
 							}
@@ -260,7 +260,7 @@ class CacheableRequest {
 			return new CacheableRequest.CacheError(new Error('runHooks requires response argument'));
 		}
 
-		return this.hooks.get(name)(response);
+		return this.hooks.get(name)?.(response);
 	};
 }
 
