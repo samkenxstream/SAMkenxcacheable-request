@@ -37,6 +37,23 @@ We are now using pure esm support in our package. If you need to use commonjs yo
 npm install cacheable-request
 ```
 
+## Breaking Changes
+This release contains breaking changes. This is the new way to use this package.
+
+```js
+import CacheableRequest from 'cacheable-request';
+
+// Now You can do
+const cacheableRequest = new CacheableRequest(http.request).createCacheableRequest();
+const cacheReq = cacheableRequest('http://example.com', cb);
+cacheReq.on('request', req => req.end());
+// Future requests to 'example.com' will be returned from cache if still valid
+
+// You pass in any other http.request API compatible method to be wrapped with cache support:
+const cacheableRequest = new CacheableRequest(https.request).createCacheableRequest();
+const cacheableRequest = new CacheableRequest(electron.net).createCacheableRequest();
+```
+
 ## Usage
 
 ```js
