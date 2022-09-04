@@ -81,7 +81,7 @@
 			"^.+\\.(ts|tsx)$": "ts-jest"
 		},
 		"testMatch": [
-			"**/test/*.test.(ts)"
+			"**/test/*.test.(ts|js)"
 		],
 		"testEnvironment": "node"
 	},
@@ -93,6 +93,8 @@
 			"plugin:jest/recommended"
 		],
 		"rules": {
+			"@typescript-eslint/triple-slash-reference": 0,
+			"@typescript-eslint/no-namespace":0,
 			"@typescript-eslint/no-unsafe-assignment": 0,
 			"@typescript-eslint/no-unsafe-call": 0,
 			"@typescript-eslint/ban-types": 0,
