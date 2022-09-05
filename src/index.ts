@@ -9,7 +9,7 @@ import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantic
 import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
-import CacheableRequests, {RequestFn} from './types.js';
+import {RequestFn, StorageAdapter, Options, Emitter, UrlOption} from './types.js';
 
 type Func = (...args: any[]) => any;
 
@@ -30,10 +30,10 @@ class CacheableRequest {
 		}
 	};
 
-	cache: CacheableRequests.StorageAdapter;
+	cache: StorageAdapter;
 	request: RequestFn;
-	hooks: Map<string, Func> = new Map<string, any>();
-	constructor(request: RequestFn, cacheAdapter?: CacheableRequests.StorageAdapter | string) {
+	hooks: Map<string, Func> = new Map<string, Func>();
+	constructor(request: RequestFn, cacheAdapter?: StorageAdapter | string) {
 		if (cacheAdapter instanceof Keyv) {
 			this.cache = cacheAdapter;
 		} else if (typeof cacheAdapter === 'string') {
@@ -52,7 +52,7 @@ class CacheableRequest {
 		this.request = request;
 	}
 
-	createCacheableRequest = () => (options: (CacheableRequests.Options & RequestOptions & CacheSemanticsOptions) | string | URL,
+	createCacheableRequest = () => (options: (Options & RequestOptions & CacheSemanticsOptions) | string | URL,
 		cb?: (response: ServerResponse | Response) => void): EventEmitter => {
 		let url;
 		if (typeof options === 'string') {
@@ -272,12 +272,7 @@ const cloneResponse = (response: IncomingMessage) => {
 };
 
 const urlObjectToRequestOptions = (url: any) => {
-	interface Option {
-		path: string;
-		pathname?: string;
-		search?: string;
-	}
-	const options: Option = {...url};
+	const options: UrlOption = {...url};
 	options.path = `${url.pathname || '/'}${url.search || ''}`;
 	delete options.pathname;
 	delete options.search;
