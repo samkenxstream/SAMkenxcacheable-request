@@ -6,8 +6,7 @@ import getStream from 'get-stream';
 import createTestServer from 'create-test-server';
 import delay from 'delay';
 import sqlite3 from 'sqlite3';
-import Keyv, {Store} from 'keyv';
-import pify from 'pify';
+import Keyv from 'keyv';
 import CacheableRequest from '../src/index.js';
 
 // Promisify cacheableRequest
@@ -589,19 +588,17 @@ test('Keyv cache adapters load via connection uri', async () => {
 	);
 	const cacheableRequestHelper = promisify(cacheableRequest.createCacheableRequest());
 	const db = new sqlite3.Database('test/testdb.sqlite');
-	const query = pify(db.all.bind(db));
 	const firstResponse: any = await cacheableRequestHelper(s.url + endpoint);
 	await delay(1000);
 	const secondResponse: any = await cacheableRequestHelper(s.url + endpoint);
-	const cacheResult = await query(
-		`SELECT * FROM keyv WHERE "key" = "cacheable-request:GET:${
-			s.url + endpoint
-		}"`,
-	);
+	db.all(`SELECT * FROM keyv WHERE "key" = "cacheable-request:GET:${
+		s.url + endpoint
+	}"`, (error, data) => {
+		expect(data.length).toBe(1);
+		db.all('DELETE FROM keyv');
+	});
 	expect(firstResponse.fromCache).toBeFalsy();
 	expect(secondResponse.fromCache).toBeTruthy();
-	expect(cacheResult.length).toBe(1);
-	await query('DELETE FROM keyv');
 });
 test('ability to force refresh', async () => {
 	const endpoint = '/cache';
