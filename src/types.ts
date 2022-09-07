@@ -12,7 +12,7 @@ import {URL} from 'node:url';
 import {EventEmitter} from 'node:events';
 import {Buffer} from 'node:buffer';
 import {Store} from 'keyv';
-import {Options as CacheSemanticsOptions} from 'http-cache-semantics';
+import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantics';
 import ResponseLike from 'responselike';
 
 export type RequestFn = typeof request;
@@ -63,7 +63,7 @@ export interface Options {
 
 	url?: string | undefined;
 
-	headers?: any;
+	headers?: Record<string, string | string[] | undefined>;
 
 	body?: Buffer;
 }

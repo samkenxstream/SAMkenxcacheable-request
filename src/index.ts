@@ -62,7 +62,7 @@ class CacheableRequest {
 			...options,
 			...urlObjectToRequestOptions(url),
 		};
-		options.headers = Object.fromEntries(Object.entries(options.headers).map(([key, value]) => [key.toLowerCase(), value]));
+		options.headers = Object.fromEntries(entries(options.headers).map(([key, value]) => [(key as string).toLowerCase(), value]));
 		const ee = new EventEmitter();
 		const normalizedUrlString = normalizeUrl(urlLib.format(url), {
 			stripWWW: false, // eslint-disable-line @typescript-eslint/naming-convention
@@ -247,6 +247,8 @@ class CacheableRequest {
 		return this.hooks.get(name)?.(response);
 	};
 }
+
+const entries = Object.entries as <T>(object: T) => Array<[keyof T, T[keyof T]]>;
 
 const cloneResponse = (response: IncomingMessage) => {
 	const clone = new PassThroughStream({autoDestroy: false});
