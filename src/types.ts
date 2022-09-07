@@ -19,7 +19,7 @@ export type RequestFn = typeof request;
 
 export type CacheableRequestFunction = (
 	options: (Options & RequestOptions & CacheSemanticsOptions) | string | URL,
-	cb?: (response: ServerResponse | ResponseLike) => void
+	cb?: (response: ServerResponse | typeof ResponseLike) => void
 ) => EventEmitter;
 
 export type StorageAdapter = Store<any>;
@@ -71,25 +71,25 @@ export interface Emitter extends EventEmitter {
 	addListener(event: 'request', listener: (request: ClientRequest) => void): this;
 	addListener(
 		event: 'response',
-		listener: (response: ServerResponse | ResponseLike) => void
+		listener: (response: ServerResponse | typeof ResponseLike) => void
 	): this;
 	addListener(event: 'error', listener: (error: RequestError | CacheError) => void): this;
 	on(event: 'request', listener: (request: ClientRequest) => void): this;
-	on(event: 'response', listener: (response: ServerResponse | ResponseLike) => void): this;
+	on(event: 'response', listener: (response: ServerResponse | typeof ResponseLike) => void): this;
 	on(event: 'error', listener: (error: RequestError | CacheError) => void): this;
 	once(event: 'request', listener: (request: ClientRequest) => void): this;
-	once(event: 'response', listener: (response: ServerResponse | ResponseLike) => void): this;
+	once(event: 'response', listener: (response: ServerResponse | typeof ResponseLike) => void): this;
 	once(event: 'error', listener: (error: RequestError | CacheError) => void): this;
 	prependListener(event: 'request', listener: (request: ClientRequest) => void): this;
 	prependListener(
 		event: 'response',
-		listener: (response: ServerResponse | ResponseLike) => void
+		listener: (response: ServerResponse | typeof ResponseLike) => void
 	): this;
 	prependListener(event: 'error', listener: (error: RequestError | CacheError) => void): this;
 	prependOnceListener(event: 'request', listener: (request: ClientRequest) => void): this;
 	prependOnceListener(
 		event: 'response',
-		listener: (response: ServerResponse | ResponseLike) => void
+		listener: (response: ServerResponse | typeof ResponseLike) => void
 	): this;
 	prependOnceListener(
 		event: 'error',
@@ -98,21 +98,21 @@ export interface Emitter extends EventEmitter {
 	removeListener(event: 'request', listener: (request: ClientRequest) => void): this;
 	removeListener(
 		event: 'response',
-		listener: (response: ServerResponse | ResponseLike) => void
+		listener: (response: ServerResponse | typeof ResponseLike) => void
 	): this;
 	removeListener(event: 'error', listener: (error: RequestError | CacheError) => void): this;
 	off(event: 'request', listener: (request: ClientRequest) => void): this;
-	off(event: 'response', listener: (response: ServerResponse | ResponseLike) => void): this;
+	off(event: 'response', listener: (response: ServerResponse | typeof ResponseLike) => void): this;
 	off(event: 'error', listener: (error: RequestError | CacheError) => void): this;
 	removeAllListeners(event?: 'request' | 'response' | 'error'): this;
 	listeners(event: 'request'): Array<(request: ClientRequest) => void>;
-	listeners(event: 'response'): Array<(response: ServerResponse | ResponseLike) => void>;
+	listeners(event: 'response'): Array<(response: ServerResponse | typeof ResponseLike) => void>;
 	listeners(event: 'error'): Array<(error: RequestError | CacheError) => void>;
 	rawListeners(event: 'request'): Array<(request: ClientRequest) => void>;
-	rawListeners(event: 'response'): Array<(response: ServerResponse | ResponseLike) => void>;
+	rawListeners(event: 'response'): Array<(response: ServerResponse | typeof ResponseLike) => void>;
 	rawListeners(event: 'error'): Array<(error: RequestError | CacheError) => void>;
 	emit(event: 'request', request: ClientRequest): boolean;
-	emit(event: 'response', response: ServerResponse | ResponseLike): boolean;
+	emit(event: 'response', response: ServerResponse | typeof ResponseLike): boolean;
 	emit(event: 'error', error: RequestError | CacheError): boolean;
 	eventNames(): Array<'request' | 'response' | 'error'>;
 	listenerCount(type: 'request' | 'response' | 'error'): number;
