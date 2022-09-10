@@ -10,7 +10,7 @@
 | ------- | ------------------ |
 | 10.x.x   | :white_check_mark: |
 | 9.x.x   | :white_check_mark: |
-| 8.x.x   | :white_check_mark: |
+| 8.x.x   | :warning: |
 | < 7.x   | :x:                |
 
 ## Reporting a Vulnerability
