@@ -247,6 +247,26 @@ CacheableRequest.removeHook('response');
 
 **Note:** Database connection errors are emitted here, however `cacheable-request` will attempt to re-request the resource and bypass the cache on a connection error. Therefore a database connection error doesn't necessarily mean the request won't be fulfilled.
 
+## How to Contribute
+
+Cacheable-Request is an open source package and community driven that is maintained regularly. In addtion we have a couple of other guidelines for review:
+
+* [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Our code of conduct
+* [CONTRIBUTING.md](CONTRIBUTING.md) - How to contribute to this project
+* [SECURITY.md](SECURITY.md) - Security guidelines and supported versions 
+
+## Post an Issue
+
+To post an issue, navigate to the "Issues" tab in the main repository, and then select "New Issue." Enter a clear title describing the issue, as well as a description containing additional relevant information. Also select the label that best describes your issue type. For a bug report, for example, create an issue with the label "bug." In the description field, Be sure to include replication steps, as well as any relevant error messages.
+
+If you're reporting a security violation, be sure to check out the project's [security policy](SECURITY.md).
+
+Please also refer to our [Code of Conduct](CODE_OF_CONDUCT.md) for more information on how to report issues.
+
+## Ask a Question
+
+To ask a question, create an issue with the label "question." In the issue description, include the related code and any context that can help us answer your question.
+
 ## License
 
 MIT © Luke Childs 2017-2021
