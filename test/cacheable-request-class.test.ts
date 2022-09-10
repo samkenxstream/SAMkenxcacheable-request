@@ -1,6 +1,7 @@
 import {request} from 'node:http';
 import Keyv from 'keyv';
 import CacheableRequest from '../src/index.js';
+import {CacheError} from '../src/types.js';
 
 test('CacheableRequest is a function', () => {
 	expect(typeof CacheableRequest).toBe('function');
@@ -38,5 +39,5 @@ test('CacheableRequest should not run hook if response is not provided', async (
 	expect(cacheableRequest.getHook('response')).not.toBeUndefined();
 	const value = await cacheableRequest.runHook('response', undefined);
 	expect(value.message).toBe('runHooks requires response argument');
-	expect(value).toBeInstanceOf(CacheableRequest.CacheError);
+	expect(value).toBeInstanceOf(CacheError);
 });

@@ -12,10 +12,11 @@ import {URL} from 'node:url';
 import {EventEmitter} from 'node:events';
 import {Buffer} from 'node:buffer';
 import {Store} from 'keyv';
-import {Options as CacheSemanticsOptions} from 'http-cache-semantics';
+import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantics';
 import ResponseLike from 'responselike';
 
 export type RequestFn = typeof request;
+export type RequestFunction = typeof request;
 
 export type CacheableRequestFunction = (
 	options: (Options & RequestOptions & CacheSemanticsOptions) | string | URL,
@@ -62,7 +63,7 @@ export interface Options {
 
 	url?: string | undefined;
 
-	headers?: any;
+	headers?: Record<string, string | string[] | undefined>;
 
 	body?: Buffer;
 }
@@ -118,18 +119,17 @@ export interface Emitter extends EventEmitter {
 	listenerCount(type: 'request' | 'response' | 'error'): number;
 }
 
-export type RequestError = RequestErrorCls;
-export type CacheError = CacheErrorCls;
-
-declare class RequestErrorCls extends Error {
-	readonly name: 'RequestError';
-
-	constructor(error: Error);
+export class RequestError extends Error {
+	constructor(error: Error) {
+		super(error.message);
+		Object.assign(this, error);
+	}
 }
-declare class CacheErrorCls extends Error {
-	readonly name: 'CacheError';
-
-	constructor(error: Error);
+export class CacheError extends Error {
+	constructor(error: Error) {
+		super(error.message);
+		Object.assign(this, error);
+	}
 }
 
 export interface UrlOption {

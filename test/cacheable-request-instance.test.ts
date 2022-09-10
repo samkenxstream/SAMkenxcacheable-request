@@ -5,6 +5,7 @@ import url from 'node:url';
 import createTestServer from 'create-test-server';
 import getStream from 'get-stream';
 import CacheableRequest from '../src/index.js';
+import {CacheError, RequestError} from '../src/types.js';
 
 let s: any;
 beforeAll(async () => {
@@ -86,7 +87,7 @@ test('cacheableRequest emits CacheError if cache adapter connection errors', don
 	const cacheableRequest = new CacheableRequest(request, 'sqlite://non/existent/database.sqlite').createCacheableRequest();
 	cacheableRequest(url.parse(s.url))
 		.on('error', (error: any) => {
-			expect(error instanceof CacheableRequest.CacheError).toBeTruthy();
+			expect(error instanceof CacheError).toBeTruthy();
 			if (error.code === 'SQLITE_CANTOPEN') {
 				expect(error.code).toBe('SQLITE_CANTOPEN'); // eslint-disable-line jest/no-conditional-expect
 			}
@@ -109,7 +110,7 @@ test('cacheableRequest emits CacheError if cache.get errors', async () => {
 	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
 	cacheableRequest(url.parse(s.url))
 		.on('error', (error: any) => {
-			expect(error instanceof CacheableRequest.CacheError).toBeTruthy();
+			expect(error instanceof CacheError).toBeTruthy();
 			expect(error.message).toBe(errorMessage);
 		})
 		.on('request', (request_: any) => request_.end());
@@ -128,7 +129,7 @@ test('cacheableRequest emits CacheError if cache.set errors', () => {
 	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
 	cacheableRequest(url.parse(s.url))
 		.on('error', (error: any) => {
-			expect(error instanceof CacheableRequest.CacheError).toBeTruthy();
+			expect(error instanceof CacheError).toBeTruthy();
 			expect(error.message).toBe(errorMessage);
 		})
 		.on('request', (request_: any) => request_.end());
@@ -160,7 +161,7 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 			setImmediate(() => {
 				cacheableRequest(url)
 					.on('error', async (error: any) => {
-						expect(error instanceof CacheableRequest.CacheError).toBeTruthy();
+						expect(error instanceof CacheError).toBeTruthy();
 						expect(error.message).toBe(errorMessage);
 						await s.close();
 						done();
@@ -176,7 +177,7 @@ test('cacheableRequest emits RequestError if request function throws', done => {
 	options.headers = {invalid: '💣'};
 	cacheableRequest(options)
 		.on('error', (error: any) => {
-			expect(error instanceof CacheableRequest.RequestError).toBeTruthy();
+			expect(error instanceof RequestError).toBeTruthy();
 			done();
 		})
 		.on('request', (request_: any) => request_.end());
@@ -308,7 +309,7 @@ test('cacheableRequest hashes request body as cache key', async () => {
 test('cacheableRequest skips cache for streamed body', done => { // eslint-disable-line jest/no-done-callback
 	const cache = {
 		get() {
-			fail(new CacheableRequest.CacheError(new Error('Cache error'))); // eslint-disable-line jest/no-jasmine-globals
+			fail(new CacheError(new Error('Cache error'))); // eslint-disable-line jest/no-jasmine-globals
 		},
 		set() {
 			throw new Error('cant set');

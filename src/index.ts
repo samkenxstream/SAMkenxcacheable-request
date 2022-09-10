@@ -9,27 +9,11 @@ import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantic
 import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
-import {RequestFn, StorageAdapter, Options, Emitter, UrlOption} from './types.js';
+import {RequestFn, StorageAdapter, Options, UrlOption, CacheError, RequestError} from './types.js';
 
 type Func = (...args: any[]) => any;
 
 class CacheableRequest {
-	/* eslint-disable-next-line @typescript-eslint/naming-convention */
-	static CacheError = class extends Error {
-		constructor(error: any) {
-			super(error.message);
-			Object.assign(this, error);
-		}
-	};
-
-	/* eslint-disable-next-line @typescript-eslint/naming-convention */
-	static RequestError = class extends Error {
-		constructor(error: any) {
-			super(error.message);
-			Object.assign(this, error);
-		}
-	};
-
 	cache: StorageAdapter;
 	request: RequestFn;
 	hooks: Map<string, Func> = new Map<string, Func>();
@@ -78,7 +62,7 @@ class CacheableRequest {
 			...options,
 			...urlObjectToRequestOptions(url),
 		};
-		options.headers = Object.fromEntries(Object.entries(options.headers).map(([key, value]) => [key.toLowerCase(), value]));
+		options.headers = Object.fromEntries(entries(options.headers).map(([key, value]) => [(key as string).toLowerCase(), value]));
 		const ee = new EventEmitter();
 		const normalizedUrlString = normalizeUrl(urlLib.format(url), {
 			stripWWW: false, // eslint-disable-line @typescript-eslint/naming-convention
@@ -163,16 +147,16 @@ class CacheableRequest {
 							}
 
 							await this.cache.set(key, value, ttl);
-						} catch (error: unknown) {
-							ee.emit('error', new CacheableRequest.CacheError(error));
+						} catch (error: any) {
+							ee.emit('error', new CacheError(error));
 						}
 					})();
 				} else if (options_.cache && revalidate) {
 					(async () => {
 						try {
 							await this.cache.delete(key);
-						} catch (error: unknown) {
-							ee.emit('error', new CacheableRequest.CacheError(error));
+						} catch (error: any) {
+							ee.emit('error', new CacheError(error));
 						}
 					})();
 				}
@@ -188,8 +172,8 @@ class CacheableRequest {
 				request_.once('error', requestErrorCallback);
 				request_.once('abort', requestErrorCallback);
 				ee.emit('request', request_);
-			} catch (error: unknown) {
-				ee.emit('error', new CacheableRequest.RequestError(error));
+			} catch (error: any) {
+				ee.emit('error', new RequestError(error));
 			}
 		};
 
@@ -224,7 +208,7 @@ class CacheableRequest {
 				}
 			};
 
-			const errorHandler = (error: Error) => ee.emit('error', new CacheableRequest.CacheError(error));
+			const errorHandler = (error: Error) => ee.emit('error', new CacheError(error));
 			if (this.cache instanceof Keyv) {
 				const cachek = this.cache;
 				cachek.once('error', errorHandler);
@@ -233,12 +217,12 @@ class CacheableRequest {
 
 			try {
 				await get(options);
-			} catch (error: unknown) {
+			} catch (error: any) {
 				if (options.automaticFailover && !madeRequest) {
 					makeRequest(options);
 				}
 
-				ee.emit('error', new CacheableRequest.CacheError(error));
+				ee.emit('error', new CacheError(error));
 			}
 		})();
 
@@ -257,12 +241,14 @@ class CacheableRequest {
 
 	runHook = async (name: string, response: any) => {
 		if (!response) {
-			return new CacheableRequest.CacheError(new Error('runHooks requires response argument'));
+			return new CacheError(new Error('runHooks requires response argument'));
 		}
 
 		return this.hooks.get(name)?.(response);
 	};
 }
+
+const entries = Object.entries as <T>(object: T) => Array<[keyof T, T[keyof T]]>;
 
 const cloneResponse = (response: IncomingMessage) => {
 	const clone = new PassThroughStream({autoDestroy: false});
