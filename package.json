@@ -36,7 +36,7 @@
 		"http-cache-semantics": "^4.1.0",
 		"keyv": "^4.5.0",
 		"mimic-response": "^4.0.0",
-		"normalize-url": "^7.0.3",
+		"normalize-url": "^7.1.0",
 		"responselike": "^3.0.0"
 	},
 	"devDependencies": {
