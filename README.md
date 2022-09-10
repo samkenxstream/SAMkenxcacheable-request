@@ -11,9 +11,18 @@
 
 **Note:** This is a low level wrapper around the core HTTP modules, it's not a high level request library.
 
-## ESM Support in version 9 and higher. 
+# Table of Contents
+* [Latest Changes](#latest-changes)
+* [Features](#features)
+* [Install and Usage](#install-and-usage)
+* [Storage Adapters](#storage-adapters)
+* [API](#api)
+* [Using Hooks](#using-hooks)
+* [Contributing](#contributing)
+* [Ask a Question](#ask-a-question)
+* [License](#license) (MIT)
 
-We are now using pure esm support in our package. If you need to use commonjs you can use v8 or lower. To learn more about using ESM please read this from `sindresorhus`: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+# Latest Changes
 
 ## Breaking Changes with v10.0.0
 This release contains breaking changes. This is the new way to use this package.
@@ -32,6 +41,9 @@ const cacheableRequest = new CacheableRequest(https.request).createCacheableRequ
 const cacheableRequest = new CacheableRequest(electron.net).createCacheableRequest();
 ```
 
+## ESM Support in version 9 and higher. 
+
+We are now using pure esm support in our package. If you need to use commonjs you can use v8 or lower. To learn more about using ESM please read this from `sindresorhus`: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
 ## Features
 
@@ -48,13 +60,11 @@ const cacheableRequest = new CacheableRequest(electron.net).createCacheableReque
 - Adds cache support to any existing HTTP code with minimal changes
 - Uses [http-cache-semantics](https://github.com/pornel/http-cache-semantics) internally for HTTP RFC 7234 compliance
 
-## Install
+## Install and Usage
 
 ```shell
 npm install cacheable-request
 ```
-
-## Usage
 
 ```js
 import http from 'http';
@@ -220,8 +230,13 @@ cacheableRequest('example.com', cb)
     req.end();
   });
 ```
+**Note:** Database connection errors are emitted here, however `cacheable-request` will attempt to re-request the resource and bypass the cache on a connection error. Therefore a database connection error doesn't necessarily mean the request won't be fulfilled.
 
-## Add Hooks
+
+## Using Hooks
+Hooks have been implemented since version `v9` and are very useful to modify response before saving it in cache. You can use hooks to modify response before saving it in cache. You can also use hooks to modify response before returning it to user.
+
+### Add Hooks
 
 The hook will pre compute response right before saving it in cache. You can include many hooks and it will run in order you add hook on response object.
 
@@ -236,16 +251,13 @@ cacheableRequest.addHook('response', async (response: any) => {
 });
 
 ```
-
-## Remove Hooks
+### Remove Hooks
 
 You can also remove hook by using below
 
 ```js
 CacheableRequest.removeHook('response');
 ```
-
-**Note:** Database connection errors are emitted here, however `cacheable-request` will attempt to re-request the resource and bypass the cache on a connection error. Therefore a database connection error doesn't necessarily mean the request won't be fulfilled.
 
 ## How to Contribute
 
