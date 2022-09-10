@@ -15,7 +15,7 @@
 
 We are now using pure esm support in our package. If you need to use commonjs you can use v8 or lower. To learn more about using ESM please read this from `sindresorhus`: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
-## Breaking Changes with v9.3.0
+## Breaking Changes with v10.0.0
 This release contains breaking changes. This is the new way to use this package.
 
 ```js
