@@ -63,7 +63,14 @@ const cacheableRequest = new CacheableRequest(https.request).createCacheableRequ
 const cacheableRequest = new CacheableRequest(electron.net).createCacheableRequest();
 ```
 
-## ESM Support in version 9 and higher. 
+The biggest change is that when you do a `new` CacheableRequest you now want to call `createCacheableRequest` method will give you the instance to use. 
+
+```diff
+- const cacheableRequest = new CacheableRequest(http.request);
++ const cacheableRequest = new CacheableRequest(http.request).createCacheableRequest();
+```
+
+### ESM Support in version 9 and higher. 
 
 We are now using pure esm support in our package. If you need to use commonjs you can use v8 or lower. To learn more about using ESM please read this from `sindresorhus`: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
