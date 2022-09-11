@@ -27,6 +27,28 @@
 ## Breaking Changes with v10.0.0
 This release contains breaking changes. This is the new way to use this package.
 
+### Usage Before v10
+```js
+import http from 'http';
+import CacheableRequest from 'cacheable-request';
+
+// Then instead of
+const req = http.request('http://example.com', cb);
+req.end();
+
+// You can do
+const cacheableRequest = new CacheableRequest(http.request);
+const cacheReq = cacheableRequest('http://example.com', cb);
+cacheReq.on('request', req => req.end());
+// Future requests to 'example.com' will be returned from cache if still valid
+
+// You pass in any other http.request API compatible method to be wrapped with cache support:
+const cacheableRequest = new CacheableRequest(https.request);
+const cacheableRequest = new CacheableRequest(electron.net);
+```
+
+### Usage After v10
+
 ```js
 import CacheableRequest from 'cacheable-request';
 

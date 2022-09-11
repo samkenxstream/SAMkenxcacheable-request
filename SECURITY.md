@@ -4,7 +4,7 @@
 
 `cacheable-request` has recently been upgraded with needed security fixes. Please upgrade to the latest version. We upgrade dependent modules on a monthly basis with a minor version release. 
 
-## Note: we will only support v8.x.x until end of year (2022) with any security fixes.
+## Note :warning: we will only support v8.x.x until end of year (2022) with any security fixes.
 
 | Version | Supported          |
 | ------- | ------------------ |
