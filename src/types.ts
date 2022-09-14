@@ -12,16 +12,17 @@ import {URL} from 'node:url';
 import {EventEmitter} from 'node:events';
 import {Buffer} from 'node:buffer';
 import {Store} from 'keyv';
-import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantics';
 import ResponseLike from 'responselike';
 
 export type RequestFn = typeof request;
 export type RequestFunction = typeof request;
 
 export type CacheableRequestFunction = (
-	options: (Options & RequestOptions & CacheSemanticsOptions) | string | URL,
+	options: CacheableOptions,
 	cb?: (response: ServerResponse | typeof ResponseLike) => void
-) => EventEmitter;
+) => Emitter;
+
+export type CacheableOptions = Options & RequestOptions | string | URL;
 
 export type StorageAdapter = Store<any>;
 
