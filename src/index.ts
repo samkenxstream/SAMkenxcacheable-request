@@ -5,11 +5,11 @@ import stream, {PassThrough as PassThroughStream} from 'node:stream';
 import {RequestOptions, ServerResponse, IncomingMessage} from 'node:http';
 import normalizeUrl from 'normalize-url';
 import getStream from 'get-stream';
-import CachePolicy, {Options as CacheSemanticsOptions} from 'http-cache-semantics';
+import CachePolicy from 'http-cache-semantics';
 import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
-import {RequestFn, StorageAdapter, Options, UrlOption, CacheError, RequestError} from './types.js';
+import {RequestFn, StorageAdapter, type Options, CacheableOptions, UrlOption, CacheError, RequestError, Emitter, CacheableRequestFunction} from './types.js';
 
 type Func = (...args: any[]) => any;
 
@@ -36,8 +36,8 @@ class CacheableRequest {
 		this.request = request;
 	}
 
-	createCacheableRequest = () => (options: (Options & RequestOptions & CacheSemanticsOptions) | string | URL,
-		cb?: (response: ServerResponse | Response) => void): EventEmitter => {
+	createCacheableRequest = () => (options: CacheableOptions,
+		cb?: (response: ServerResponse | typeof Response) => void): Emitter => {
 		let url;
 		if (typeof options === 'string') {
 			url = normalizeUrlObject(urlLib.parse(options));
@@ -63,7 +63,7 @@ class CacheableRequest {
 			...urlObjectToRequestOptions(url),
 		};
 		options.headers = Object.fromEntries(entries(options.headers).map(([key, value]) => [(key as string).toLowerCase(), value]));
-		const ee = new EventEmitter();
+		const ee: Emitter = new EventEmitter() as Emitter;
 		const normalizedUrlString = normalizeUrl(urlLib.format(url), {
 			stripWWW: false, // eslint-disable-line @typescript-eslint/naming-convention
 			removeTrailingSlash: false,
@@ -292,3 +292,4 @@ const convertHeaders = (headers: CachePolicy.Headers) => {
 };
 
 export default CacheableRequest;
+export * from './types.js';
