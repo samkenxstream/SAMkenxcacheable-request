@@ -2,22 +2,22 @@ import EventEmitter from 'node:events';
 import urlLib from 'node:url';
 import crypto from 'node:crypto';
 import stream, {PassThrough as PassThroughStream} from 'node:stream';
-import {RequestOptions, ServerResponse, IncomingMessage} from 'node:http';
+import {ServerResponse, IncomingMessage} from 'node:http';
 import normalizeUrl from 'normalize-url';
 import getStream from 'get-stream';
 import CachePolicy from 'http-cache-semantics';
 import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
-import {RequestFn, StorageAdapter, type Options, CacheableOptions, UrlOption, CacheError, RequestError, Emitter, CacheableRequestFunction} from './types.js';
+import {RequestFn, StorageAdapter, CacheableOptions, UrlOption, CacheError, RequestError, Emitter} from './types.js';
 
 type Func = (...args: any[]) => any;
 
 class CacheableRequest {
 	cache: StorageAdapter;
-	request: RequestFn;
+	cacheRequest: RequestFn;
 	hooks: Map<string, Func> = new Map<string, Func>();
-	constructor(request: RequestFn, cacheAdapter?: StorageAdapter | string) {
+	constructor(cacheRequest: RequestFn, cacheAdapter?: StorageAdapter | string) {
 		if (cacheAdapter instanceof Keyv) {
 			this.cache = cacheAdapter;
 		} else if (typeof cacheAdapter === 'string') {
@@ -32,11 +32,11 @@ class CacheableRequest {
 			});
 		}
 
-		this.createCacheableRequest = this.createCacheableRequest.bind(this);
-		this.request = request;
+		this.request = this.request.bind(this);
+		this.cacheRequest = cacheRequest;
 	}
 
-	createCacheableRequest = () => (options: CacheableOptions,
+	request = () => (options: CacheableOptions,
 		cb?: (response: ServerResponse | typeof Response) => void): Emitter => {
 		let url;
 		if (typeof options === 'string') {
@@ -168,7 +168,7 @@ class CacheableRequest {
 			};
 
 			try {
-				const request_ = this.request(options_, handler);
+				const request_ = this.cacheRequest(options_, handler);
 				request_.once('error', requestErrorCallback);
 				request_.once('abort', requestErrorCallback);
 				ee.emit('request', request_);
