@@ -309,8 +309,9 @@ Please also refer to our [Code of Conduct](CODE_OF_CONDUCT.md) for more informat
 
 To ask a question, create an issue with the label "question." In the issue description, include the related code and any context that can help us answer your question.
 
-## License [MIT](LICENSE)
+## License
+
+This project is under the [MIT](LICENSE) license. 
 
 MIT © Luke Childs 2017-2021
-
 MIT © Jared Wray 2022
