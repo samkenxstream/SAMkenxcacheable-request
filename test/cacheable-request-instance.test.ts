@@ -24,34 +24,34 @@ test('cacheableRequest is a class', () => {
 	expect(typeof cacheableRequest).toBe('object');
 });
 test('cacheableRequest returns an event emitter', () => {
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	const returnValue = cacheableRequest(url.parse(s.url), () => true).on('request', (request_: any) => request_.end());
 	expect(returnValue instanceof EventEmitter).toBeTruthy();
 });
 
 test('cacheableRequest passes requests through if no cache option is set', () => {
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	cacheableRequest(url.parse(s.url), async (response: any) => {
 		const body = await getStream(response);
 		expect(body).toBe('hi');
 	}).on('request', (request_: any) => request_.end());
 });
 test('cacheableRequest accepts url as string', () => {
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	cacheableRequest(s.url, async (response: any) => {
 		const body = await getStream(response);
 		expect(body).toBe('hi');
 	}).on('request', (request_: any) => request_.end());
 });
 test('cacheableRequest accepts url as URL', () => {
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	cacheableRequest(new url.URL(s.url), async (response: any) => {
 		const body = await getStream(response);
 		expect(body).toBe('hi');
 	}).on('request', (request_: any) => request_.end());
 });
 test('cacheableRequest handles no callback parameter', () => {
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	cacheableRequest(url.parse(s.url)).on('request', (request_: any) => {
 		request_.end();
 		request_.on('response', (response: any) => {
@@ -60,7 +60,7 @@ test('cacheableRequest handles no callback parameter', () => {
 	});
 });
 test('cacheableRequest emits response event for network responses', () => {
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	cacheableRequest(url.parse(s.url))
 		.on('request', (request_: any) => request_.end())
 		.on('response', (response: any) => {
@@ -68,7 +68,7 @@ test('cacheableRequest emits response event for network responses', () => {
 		});
 });
 test('cacheableRequest emits response event for cached responses', () => {
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	const cache = new Map();
 	const {url} = s;
 	const options = Object.assign(url, {cache});
@@ -84,7 +84,7 @@ test('cacheableRequest emits response event for cached responses', () => {
 	}).on('request', (request_: any) => request_.end());
 });
 test('cacheableRequest emits CacheError if cache adapter connection errors', done => { // eslint-disable-line jest/no-done-callback
-	const cacheableRequest = new CacheableRequest(request, 'sqlite://non/existent/database.sqlite').createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, 'sqlite://non/existent/database.sqlite').request();
 	cacheableRequest(url.parse(s.url))
 		.on('error', (error: any) => {
 			expect(error instanceof CacheError).toBeTruthy();
@@ -107,7 +107,7 @@ test('cacheableRequest emits CacheError if cache.get errors', async () => {
 		delete: store.delete.bind(store),
 		clear: store.clear.bind(store),
 	};
-	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, cache).request();
 	cacheableRequest(url.parse(s.url))
 		.on('error', (error: any) => {
 			expect(error instanceof CacheError).toBeTruthy();
@@ -126,7 +126,7 @@ test('cacheableRequest emits CacheError if cache.set errors', () => {
 		delete: store.delete.bind(store),
 		clear: store.clear.bind(store),
 	};
-	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, cache).request();
 	cacheableRequest(url.parse(s.url))
 		.on('error', (error: any) => {
 			expect(error instanceof CacheError).toBeTruthy();
@@ -145,7 +145,7 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 		},
 		clear: store.clear.bind(store),
 	};
-	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, cache).request();
 	(async () => {
 		let i = 0;
 		const s = await createTestServer();
@@ -172,7 +172,7 @@ test('cacheableRequest emits CacheError if cache.delete errors', done => { // es
 	})();
 });
 test('cacheableRequest emits RequestError if request function throws', done => { // eslint-disable-line jest/no-done-callback
-	const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request).request();
 	const options: any = url.parse(s.url);
 	options.headers = {invalid: '💣'};
 	cacheableRequest(options)
@@ -192,7 +192,7 @@ test('cacheableRequest does not cache response if request is aborted before rece
 				response_.end('hi');
 			}, 100);
 		});
-		const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+		const cacheableRequest = new CacheableRequest(request).request();
 		const options = url.parse(s.url!);
 		options.path = '/delay-start';
 		cacheableRequest(options)
@@ -224,7 +224,7 @@ test('cacheableRequest does not cache response if request is aborted after recei
 				response_.end('i');
 			}, 50);
 		});
-		const cacheableRequest = new CacheableRequest(request).createCacheableRequest();
+		const cacheableRequest = new CacheableRequest(request).request();
 		const options = url.parse(s.url!);
 		options.path = '/delay-partial';
 		cacheableRequest(options)
@@ -246,7 +246,7 @@ test('cacheableRequest does not cache response if request is aborted after recei
 	/* eslint-enable max-nested-callbacks */
 });
 test('cacheableRequest makes request even if initial DB connection fails (when opts.automaticFailover is enabled)', async () => {
-	const cacheableRequest = new CacheableRequest(request, 'sqlite://non/existent/database.sqlite').createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, 'sqlite://non/existent/database.sqlite').request();
 	const options: any = url.parse(s.url);
 	options.automaticFailover = true;
 	cacheableRequest(options, (response_: any) => {
@@ -272,7 +272,7 @@ test('cacheableRequest makes request even if current DB connection fails (when o
 		},
 	};
 	/* eslint-enable unicorn/error-message */
-	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, cache).request();
 	const options: any = url.parse(s.url);
 	options.automaticFailover = true;
 	cacheableRequest(options, (response_: any) => {
@@ -296,7 +296,7 @@ test('cacheableRequest hashes request body as cache key', async () => {
 			throw new Error('cant clear');
 		},
 	};
-	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, cache).request();
 	const options: any = url.parse(s.url);
 	options.body = 'hello';
 	options.method = 'POST';
@@ -321,7 +321,7 @@ test('cacheableRequest skips cache for streamed body', done => { // eslint-disab
 			throw new Error('cant clear');
 		},
 	};
-	const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
+	const cacheableRequest = new CacheableRequest(request, cache).request();
 	const options: any = url.parse(s.url);
 	options.body = new stream.PassThrough();
 	options.method = 'POST';

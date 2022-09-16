@@ -53,21 +53,21 @@ const cacheableRequest = new CacheableRequest(electron.net);
 import CacheableRequest from 'cacheable-request';
 
 // Now You can do
-const cacheableRequest = new CacheableRequest(http.request).createCacheableRequest();
+const cacheableRequest = new CacheableRequest(http.request).request();
 const cacheReq = cacheableRequest('http://example.com', cb);
 cacheReq.on('request', req => req.end());
 // Future requests to 'example.com' will be returned from cache if still valid
 
 // You pass in any other http.request API compatible method to be wrapped with cache support:
-const cacheableRequest = new CacheableRequest(https.request).createCacheableRequest();
-const cacheableRequest = new CacheableRequest(electron.net).createCacheableRequest();
+const cacheableRequest = new CacheableRequest(https.request).request();
+const cacheableRequest = new CacheableRequest(electron.net).request();
 ```
 
-The biggest change is that when you do a `new` CacheableRequest you now want to call `createCacheableRequest` method will give you the instance to use. 
+The biggest change is that when you do a `new` CacheableRequest you now want to call `request` method will give you the instance to use. 
 
 ```diff
 - const cacheableRequest = new CacheableRequest(http.request);
-+ const cacheableRequest = new CacheableRequest(http.request).createCacheableRequest();
++ const cacheableRequest = new CacheableRequest(http.request).request();
 ```
 
 ### ESM Support in version 9 and higher. 
