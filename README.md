@@ -47,7 +47,8 @@ const cacheableRequest = new CacheableRequest(https.request);
 const cacheableRequest = new CacheableRequest(electron.net);
 ```
 
-### Usage After v10
+### Usage After v10.1.0
+```js
 
 ```js
 import CacheableRequest from 'cacheable-request';
