@@ -292,8 +292,16 @@ CacheableRequest.removeHook('response');
 ### Add Remote Address
 
 ```js
+import CacheableRequest, {CacheValue, remoteAddress} from 'cacheable-request';
+
 const cacheableRequest = new CacheableRequest(request, cache).request();
-cacheableRequest.addRemoteAddress();
+cacheableRequest.addHook(remoteAddress, (value: CacheValue, response: any) => {
+  if (response.connection) {
+    value.remoteAddress = response.connection.remoteAddress;
+  }
+
+  return value;
+});
 ```
 
 ## How to Contribute

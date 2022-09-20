@@ -7,7 +7,7 @@ import createTestServer from 'create-test-server';
 import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
-import CacheableRequest, {CacheValue} from '../src/index.js';
+import CacheableRequest, {CacheValue, remoteAddress} from '../src/index.js';
 
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {
@@ -662,7 +662,13 @@ test('cache remote address', async () => {
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest.request());
-	cacheableRequest.addRemoteAddress();
+	cacheableRequest.addHook(remoteAddress, (value: CacheValue, response: any) => {
+		if (response.connection) {
+			value.remoteAddress = response.connection.remoteAddress;
+		}
+
+		return value;
+	});
 	const response: any = await cacheableRequestHelper(s.url + endpoint);
 	const cacheValue = JSON.parse(await cache.get(`cacheable-request:GET:${s.url + endpoint}`));
 	expect(cacheValue.value.remoteAddress).toBeDefined();

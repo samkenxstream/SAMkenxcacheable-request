@@ -17,7 +17,6 @@ class CacheableRequest {
 	cache: StorageAdapter;
 	cacheRequest: RequestFn;
 	hooks: Map<string, Func> = new Map<string, Func>();
-	remoteAddressHook = 'remoteAddress';
 	constructor(cacheRequest: RequestFn, cacheAdapter?: StorageAdapter | string) {
 		if (cacheAdapter instanceof Keyv) {
 			this.cache = cacheAdapter;
@@ -141,9 +140,9 @@ class CacheableRequest {
 
 							if (this.hooks.size > 0) {
 								// Run remote address hook before
-								if (this.hooks.has(this.remoteAddressHook)) {
-									value = await this.runHook(this.remoteAddressHook, value, response);
-									this.hooks.delete(this.remoteAddressHook);
+								if (this.hooks.has(remoteAddress)) {
+									value = await this.runHook(remoteAddress, value, response);
+									this.hooks.delete(remoteAddress);
 								}
 
 								/* eslint-disable no-await-in-loop */
@@ -247,19 +246,7 @@ class CacheableRequest {
 	getHook = (name: string) => this.hooks.get(name);
 
 	runHook = async (name: string, ...args: any[]): Promise<CacheValue> => this.hooks.get(name)?.(...args);
-
-	addRemoteAddress = () => {
-		this.hooks.set(this.remoteAddressHook, remoteAddress);
-	};
 }
-
-const remoteAddress = (...args: any[]) => {
-	if (args[1].connection) {
-		args[0].remoteAddress = args[1]?.connection?.remoteAddress;
-	}
-
-	return args[0];
-};
 
 const entries = Object.entries as <T>(object: T) => Array<[keyof T, T[keyof T]]>;
 
@@ -306,3 +293,4 @@ const convertHeaders = (headers: CachePolicy.Headers) => {
 
 export default CacheableRequest;
 export * from './types.js';
+export const remoteAddress = 'remoteAddress';
