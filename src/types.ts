@@ -7,12 +7,12 @@
 
 /// <reference types="node" />
 
-import {request, RequestOptions, ClientRequest, ServerResponse} from 'node:http';
-import {URL} from 'node:url';
-import {EventEmitter} from 'node:events';
-import {Buffer} from 'node:buffer';
-import {Store} from 'keyv';
-import ResponseLike from 'responselike';
+import type {request, RequestOptions, ClientRequest, ServerResponse} from 'node:http';
+import type {URL} from 'node:url';
+import type {EventEmitter} from 'node:events';
+import type {Buffer} from 'node:buffer';
+import type {Store} from 'keyv';
+import type ResponseLike from 'responselike';
 
 export type RequestFn = typeof request;
 export type RequestFunction = typeof request;
