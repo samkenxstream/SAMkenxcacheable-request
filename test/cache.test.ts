@@ -644,10 +644,10 @@ test('decompresses cached responses', async () => {
 	const endpoint = '/compress';
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
-	cacheableRequest.addHook('response', async (value: CacheValue, response: CacheValue) => {
-		const buffer = await pm(gunzip)(response.body);
-		response.body = buffer.toString();
-		return response;
+	cacheableRequest.addHook('response', async (value: CacheValue) => {
+		const buffer = await pm(gunzip)(value.body);
+		value.body = buffer.toString();
+		return value;
 	});
 	const cacheableRequestHelper = promisify(cacheableRequest.request());
 	const response: any = await cacheableRequestHelper(s.url + endpoint);
