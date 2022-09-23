@@ -274,7 +274,7 @@ The hook will pre compute response right before saving it in cache. You can incl
 import http from 'http';
 import CacheableRequest from 'cacheable-request';
 
-const cacheableRequest = new CacheableRequest(request, cache).createCacheableRequest();
+const cacheableRequest = new CacheableRequest(request, cache).request();
 cacheableRequest.addHook('response', async (response: any) => {
   const buffer = await pm(gunzip)(response);
   return buffer.toString();
@@ -287,6 +287,21 @@ You can also remove hook by using below
 
 ```js
 CacheableRequest.removeHook('response');
+```
+
+### Add Remote Address
+
+```js
+import CacheableRequest, {CacheValue, remoteAddress} from 'cacheable-request';
+
+const cacheableRequest = new CacheableRequest(request, cache).request();
+cacheableRequest.addHook(remoteAddress, (value: CacheValue, response: any) => {
+  if (response.connection) {
+    value.remoteAddress = response.connection.remoteAddress;
+  }
+
+  return value;
+});
 ```
 
 ## How to Contribute

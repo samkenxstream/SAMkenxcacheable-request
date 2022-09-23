@@ -2,14 +2,14 @@ import EventEmitter from 'node:events';
 import urlLib from 'node:url';
 import crypto from 'node:crypto';
 import stream, {PassThrough as PassThroughStream} from 'node:stream';
-import {ServerResponse, IncomingMessage} from 'node:http';
+import {IncomingMessage} from 'node:http';
 import normalizeUrl from 'normalize-url';
 import getStream from 'get-stream';
 import CachePolicy from 'http-cache-semantics';
 import Response from 'responselike';
 import Keyv from 'keyv';
 import mimicResponse from 'mimic-response';
-import {RequestFn, StorageAdapter, CacheableOptions, UrlOption, CacheError, RequestError, Emitter} from './types.js';
+import {RequestFn, StorageAdapter, CacheResponse, CacheValue, CacheableOptions, UrlOption, CacheError, RequestError, Emitter, CacheableRequestFunction} from './types.js';
 
 type Func = (...args: any[]) => any;
 
@@ -37,7 +37,7 @@ class CacheableRequest {
 	}
 
 	request = () => (options: CacheableOptions,
-		cb?: (response: ServerResponse | typeof Response) => void): Emitter => {
+		cb?: (response: CacheResponse) => void): Emitter => {
 		let url;
 		if (typeof options === 'string') {
 			url = normalizeUrlObject(urlLib.parse(options));
@@ -127,11 +127,11 @@ class CacheableRequest {
 								new Promise(resolve => response.once('end', resolve)), // eslint-disable-line no-promise-executor-return
 							]);
 							const body = await bodyPromise;
-							const value = {
-								cachePolicy: response.cachePolicy.toObject(),
+							let value: CacheValue = {
 								url: response.url,
 								statusCode: response.fromCache ? revalidate.statusCode : response.statusCode,
 								body,
+								cachePolicy: response.cachePolicy.toObject(),
 							};
 							let ttl = options_.strictTtl ? response.cachePolicy.timeToLive() : undefined;
 							if (options_.maxTtl) {
@@ -139,9 +139,15 @@ class CacheableRequest {
 							}
 
 							if (this.hooks.size > 0) {
+								// Run remote address hook before
+								if (this.hooks.has(remoteAddress)) {
+									value = await this.runHook(remoteAddress, value, response);
+									this.hooks.delete(remoteAddress);
+								}
+
 								/* eslint-disable no-await-in-loop */
 								for (const key_ of this.hooks.keys()) {
-									value.body = await this.runHook(key_, value.body);
+									value = await this.runHook(key_, value);
 								}
 								/* eslint-enable no-await-in-loop */
 							}
@@ -239,13 +245,7 @@ class CacheableRequest {
 
 	getHook = (name: string) => this.hooks.get(name);
 
-	runHook = async (name: string, response: any) => {
-		if (!response) {
-			return new CacheError(new Error('runHooks requires response argument'));
-		}
-
-		return this.hooks.get(name)?.(response);
-	};
+	runHook = async (name: string, ...args: any[]): Promise<CacheValue> => this.hooks.get(name)?.(...args);
 }
 
 const entries = Object.entries as <T>(object: T) => Array<[keyof T, T[keyof T]]>;
@@ -293,3 +293,4 @@ const convertHeaders = (headers: CachePolicy.Headers) => {
 
 export default CacheableRequest;
 export * from './types.js';
+export const remoteAddress = 'remoteAddress';

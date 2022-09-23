@@ -7,7 +7,7 @@ import createTestServer from 'create-test-server';
 import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
-import CacheableRequest from '../src/index.js';
+import CacheableRequest, {CacheValue, remoteAddress} from '../src/index.js';
 
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {
@@ -644,9 +644,10 @@ test('decompresses cached responses', async () => {
 	const endpoint = '/compress';
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
-	cacheableRequest.addHook('response', async (response: any) => {
-		const buffer = await pm(gunzip)(response);
-		return buffer.toString();
+	cacheableRequest.addHook('response', async (response: CacheValue) => {
+		const buffer = await pm(gunzip)(response.body);
+		response.body = buffer.toString();
+		return response;
 	});
 	const cacheableRequestHelper = promisify(cacheableRequest.request());
 	const response: any = await cacheableRequestHelper(s.url + endpoint);
@@ -654,4 +655,33 @@ test('decompresses cached responses', async () => {
 	const iterator = cache.values();
 	const {value} = JSON.parse(iterator.next().value);
 	expect(value.body).toBe('{"foo":"bar"}');
+});
+
+test('cache remote address', async () => {
+	const endpoint = '/etag';
+	const cache = new Map();
+	const cacheableRequest = new CacheableRequest(request, cache);
+	const cacheableRequestHelper = promisify(cacheableRequest.request());
+	cacheableRequest.addHook(remoteAddress, (value: CacheValue, response: any) => {
+		if (response.connection) {
+			value.remoteAddress = response.connection.remoteAddress;
+		}
+
+		return value;
+	});
+	const response: any = await cacheableRequestHelper(s.url + endpoint);
+	const cacheValue = JSON.parse(await cache.get(`cacheable-request:GET:${s.url + endpoint}`));
+	expect(cacheValue.value.remoteAddress).toBeDefined();
+	expect(response.statusCode).toBe(200);
+});
+
+test('do not cache remote address', async () => {
+	const endpoint = '/etag';
+	const cache = new Map();
+	const cacheableRequest = new CacheableRequest(request, cache);
+	const cacheableRequestHelper = promisify(cacheableRequest.request());
+	const response: any = await cacheableRequestHelper(s.url + endpoint);
+	const cacheValue = JSON.parse(await cache.get(`cacheable-request:GET:${s.url + endpoint}`));
+	expect(cacheValue.value.remoteAddress).toBeUndefined();
+	expect(response.statusCode).toBe(200);
 });

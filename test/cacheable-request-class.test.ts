@@ -32,12 +32,3 @@ test('CacheableRequest should run hook', async () => {
 	const value = await cacheableRequest.runHook('response', 10);
 	expect(value).toBe(10);
 });
-
-test('CacheableRequest should not run hook if response is not provided', async () => {
-	const cacheableRequest = new CacheableRequest(request);
-	cacheableRequest.addHook('response', (response: any) => response);
-	expect(cacheableRequest.getHook('response')).not.toBeUndefined();
-	const value = await cacheableRequest.runHook('response', undefined);
-	expect(value.message).toBe('runHooks requires response argument');
-	expect(value).toBeInstanceOf(CacheError);
-});
