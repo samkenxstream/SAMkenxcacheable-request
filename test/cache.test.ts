@@ -7,7 +7,7 @@ import createTestServer from 'create-test-server';
 import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
-import CacheableRequest, {CacheValue, remoteAddress} from '../src/index.js';
+import CacheableRequest, {CacheValue, onResponse} from '../src/index.js';
 
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {
@@ -644,7 +644,7 @@ test('decompresses cached responses', async () => {
 	const endpoint = '/compress';
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
-	cacheableRequest.addHook('response', async (response: CacheValue) => {
+	cacheableRequest.addHook('response', async (value: CacheValue, response: CacheValue) => {
 		const buffer = await pm(gunzip)(response.body);
 		response.body = buffer.toString();
 		return response;
@@ -662,7 +662,7 @@ test('cache remote address', async () => {
 	const cache = new Map();
 	const cacheableRequest = new CacheableRequest(request, cache);
 	const cacheableRequestHelper = promisify(cacheableRequest.request());
-	cacheableRequest.addHook(remoteAddress, (value: CacheValue, response: any) => {
+	cacheableRequest.addHook(onResponse, (value: CacheValue, response: any) => {
 		if (response.connection) {
 			value.remoteAddress = response.connection.remoteAddress;
 		}

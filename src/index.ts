@@ -139,15 +139,9 @@ class CacheableRequest {
 							}
 
 							if (this.hooks.size > 0) {
-								// Run remote address hook before
-								if (this.hooks.has(remoteAddress)) {
-									value = await this.runHook(remoteAddress, value, response);
-									this.hooks.delete(remoteAddress);
-								}
-
 								/* eslint-disable no-await-in-loop */
 								for (const key_ of this.hooks.keys()) {
-									value = await this.runHook(key_, value);
+									value = await this.runHook(key_, value, response);
 								}
 								/* eslint-enable no-await-in-loop */
 							}
@@ -293,4 +287,4 @@ const convertHeaders = (headers: CachePolicy.Headers) => {
 
 export default CacheableRequest;
 export * from './types.js';
-export const remoteAddress = 'remoteAddress';
+export const onResponse = 'onResponse';
