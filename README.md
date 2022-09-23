@@ -282,20 +282,12 @@ cacheableRequest.addHook('onResponse', async (value: CacheValue, response: any) 
   value.body = buffer.toString();
   return value;
 });
-
-```
-### Remove Hooks
-
-You can also remove hook by using below
-
-```js
-CacheableRequest.removeHook('onResponse');
 ```
 
-### Add Remote Address
+here is also an example of how to add in the remote address
 
 ```js
-import CacheableRequest, {CacheValue, remoteAddress} from 'cacheable-request';
+import CacheableRequest, {CacheValue} from 'cacheable-request';
 
 const cacheableRequest = new CacheableRequest(request, cache).request();
 cacheableRequest.addHook('onResponse', (value: CacheValue, response: any) => {
@@ -305,6 +297,14 @@ cacheableRequest.addHook('onResponse', (value: CacheValue, response: any) => {
 
   return value;
 });
+```
+
+### Remove Hooks
+
+You can also remove hook by using below
+
+```js
+CacheableRequest.removeHook('onResponse');
 ```
 
 ## How to Contribute
