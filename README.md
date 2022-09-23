@@ -275,9 +275,12 @@ import http from 'http';
 import CacheableRequest from 'cacheable-request';
 
 const cacheableRequest = new CacheableRequest(request, cache).request();
-cacheableRequest.addHook('response', async (response: any) => {
-  const buffer = await pm(gunzip)(response);
-  return buffer.toString();
+
+// adding a hook to decompress response
+cacheableRequest.addHook('onResponse', async (value: CacheValue, response: any) => {
+  const buffer = await pm(gunzip)(value.body);
+  value.body = buffer.toString();
+  return value;
 });
 
 ```
@@ -286,7 +289,7 @@ cacheableRequest.addHook('response', async (response: any) => {
 You can also remove hook by using below
 
 ```js
-CacheableRequest.removeHook('response');
+CacheableRequest.removeHook('onResponse');
 ```
 
 ### Add Remote Address
@@ -295,7 +298,7 @@ CacheableRequest.removeHook('response');
 import CacheableRequest, {CacheValue, remoteAddress} from 'cacheable-request';
 
 const cacheableRequest = new CacheableRequest(request, cache).request();
-cacheableRequest.addHook(remoteAddress, (value: CacheValue, response: any) => {
+cacheableRequest.addHook('onResponse', (value: CacheValue, response: any) => {
   if (response.connection) {
     value.remoteAddress = response.connection.remoteAddress;
   }
