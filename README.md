@@ -275,9 +275,12 @@ import http from 'http';
 import CacheableRequest from 'cacheable-request';
 
 const cacheableRequest = new CacheableRequest(request, cache).request();
+
+// adding a hook to decompress response
 cacheableRequest.addHook('onResponse', async (value: CacheValue, response: any) => {
-  const buffer = await pm(gunzip)(response);
-  return buffer.toString();
+  const buffer = await pm(gunzip)(value.body);
+  value.body = buffer.toString();
+  return value;
 });
 
 ```
