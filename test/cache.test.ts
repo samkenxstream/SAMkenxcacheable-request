@@ -1,4 +1,4 @@
-import {request} from 'node:http';
+import {Agent, request} from 'node:http';
 import url from 'node:url';
 import util, {promisify as pm} from 'node:util';
 import {gzip, gunzip} from 'node:zlib';
@@ -684,4 +684,25 @@ test('do not cache remote address', async () => {
 	const cacheValue = JSON.parse(await cache.get(`cacheable-request:GET:${s.url + endpoint}`));
 	expect(cacheValue.value.remoteAddress).toBeUndefined();
 	expect(response.statusCode).toBe(200);
+});
+test('socket within keepAlive Agent has been free\'d after cache revalidation', async () => {
+	const endpoint = '/last-modified';
+	const cache = new Map();
+	const cacheableRequest = new CacheableRequest(request, cache);
+	const cacheableRequestHelper = promisify(cacheableRequest.request());
+	const agent = new Agent({
+		keepAlive: true,
+	});
+	const options = {agent, ...url.parse(s.url + endpoint)};
+	try {
+		expect(Object.keys(agent.freeSockets)).toHaveLength(0);
+		let response: any = await cacheableRequestHelper(options); // 200
+		expect(Object.keys(agent.sockets)).toHaveLength(0);
+		expect(Object.keys(agent.freeSockets)).toHaveLength(1);
+		response = await cacheableRequestHelper(options); // 304
+		expect(Object.keys(agent.sockets)).toHaveLength(0);
+		expect(Object.keys(agent.freeSockets)).toHaveLength(1);
+	} finally {
+		agent.destroy();
+	}
 });
