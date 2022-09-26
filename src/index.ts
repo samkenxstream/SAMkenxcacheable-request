@@ -99,11 +99,17 @@ class CacheableRequest {
 					}
 				};
 			});
-			const handler = (response: any) => {
+			const handler = async (response: any) => {
 				if (revalidate) {
 					response.status = response.statusCode;
 					const revalidatedPolicy = CachePolicy.fromObject(revalidate.cachePolicy).revalidatedPolicy(options_, response);
 					if (!revalidatedPolicy.modified) {
+						response.resume();
+						await new Promise(resolve => {
+							// Skipping 'error' handler cause 'error' event should't be emitted for 304 response
+							response
+								.once('end', resolve);
+						});
 						const headers = convertHeaders(revalidatedPolicy.policy.responseHeaders());
 						response = new Response({statusCode: revalidate.statusCode, headers, body: revalidate.body, url: revalidate.url});
 						response.cachePolicy = revalidatedPolicy.policy;
