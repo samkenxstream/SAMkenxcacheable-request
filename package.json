@@ -33,6 +33,7 @@
 		"compliant"
 	],
 	"dependencies": {
+		"@types/http-cache-semantics": "^4.0.1",
 		"get-stream": "^6.0.1",
 		"http-cache-semantics": "^4.1.0",
 		"keyv": "^4.5.0",
@@ -45,7 +46,6 @@
 		"@types/create-test-server": "^3.0.1",
 		"@types/delay": "^3.1.0",
 		"@types/get-stream": "^3.0.2",
-		"@types/http-cache-semantics": "^4.0.1",
 		"@types/jest": "^29.0.3",
 		"@types/node": "^18.7.18",
 		"@types/responselike": "^1.0.0",
