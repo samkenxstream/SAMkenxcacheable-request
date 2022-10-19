@@ -42,7 +42,7 @@
 		"responselike": "^3.0.0"
 	},
 	"devDependencies": {
-		"@keyv/sqlite": "^3.6.1",
+		"@keyv/sqlite": "^3.6.2",
 		"@types/create-test-server": "^3.0.1",
 		"@types/delay": "^3.1.0",
 		"@types/get-stream": "^3.0.2",
