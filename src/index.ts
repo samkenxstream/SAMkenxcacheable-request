@@ -131,6 +131,7 @@ class CacheableRequest {
 							await Promise.race([
 								requestErrorPromise,
 								new Promise(resolve => response.once('end', resolve)), // eslint-disable-line no-promise-executor-return
+								new Promise(resolve => response.once('close', resolve)), // eslint-disable-line no-promise-executor-return
 							]);
 							const body = await bodyPromise;
 							let value: CacheValue = {
@@ -177,6 +178,7 @@ class CacheableRequest {
 				const request_ = this.cacheRequest(options_, handler);
 				request_.once('error', requestErrorCallback);
 				request_.once('abort', requestErrorCallback);
+				request_.once('destroy', requestErrorCallback);
 				ee.emit('request', request_);
 			} catch (error: any) {
 				ee.emit('error', new RequestError(error));

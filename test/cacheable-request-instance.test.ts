@@ -333,3 +333,25 @@ test('cacheableRequest skips cache for streamed body', done => { // eslint-disab
 		.on('request', (request_: any) => request_.end());
 	options.body.end('hello');
 });
+
+test('cacheableRequest makes request and cancelled)', async () => {
+	const cacheableRequest = new CacheableRequest(request, new Map()).request();
+	const options: any = url.parse(s.url);
+	cacheableRequest(options, (response_: any) => {
+		expect(response_.statusCode).toBe(400);
+	})
+		.on('error', () => {/* do nothing */})
+		.on('request', (request_: any) => request_.abort());
+});
+
+test('cacheableRequest emits CacheError if request cancels', done => { // eslint-disable-line jest/no-done-callback
+	const cacheableRequest = new CacheableRequest(request).request();
+	const options: any = url.parse(s.url);
+	options.headers = {invalid: '💣'};
+	cacheableRequest(options)
+		.on('error', (error: any) => {
+			expect(error instanceof CacheError).toBeTruthy();
+			done();
+		})
+		.on('request', (request_: any) => request_.abort());
+});
