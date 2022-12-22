@@ -65,6 +65,9 @@ const createTestServer = (opts = {}) => createCert(opts.certificate)
 			commonName: 'example.com'
 		}, typeof opts === 'string' ? { commonName: opts } : opts);
 	
+		return Promise.resolve();
+
+		/*
 		return pify(pem.createCertificate)({
 			days: opts.days,
 			selfSigned: true
@@ -77,6 +80,7 @@ const createTestServer = (opts = {}) => createCert(opts.certificate)
 			cert: keys.certificate,
 			caCert: caKeys.certificate
 		})));
+		*/
 	};
 
 export default createTestServer;
