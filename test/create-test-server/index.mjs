@@ -7,14 +7,13 @@ import express from 'express';
 import pify from 'pify';
 import bodyParser from 'body-parser';
 import pem from 'pem';
+import devcert from 'devcert';
 
 const createTestServer = (opts = {}) => createCert(opts.certificate)
 	.then(keys => {
 		const server = express();
 		server.http = http.createServer(server);
-		server.https = https.createServer(keys, server);
-		server.caCert = keys.caCert;
-
+		
 		server.set('etag', false);
 
 		if (opts.bodyParser !== false) {
@@ -47,10 +46,6 @@ const createTestServer = (opts = {}) => createCert(opts.certificate)
 			pify(server.http.listen.bind(server.http))().then(() => {
 				server.port = server.http.address().port;
 				server.url = `http://localhost:${server.port}`;
-			}),
-			pify(server.https.listen.bind(server.https))().then(() => {
-				server.sslPort = server.https.address().port;
-				server.sslUrl = `https://localhost:${server.sslPort}`;
 			})
 		]);
 
@@ -58,10 +53,6 @@ const createTestServer = (opts = {}) => createCert(opts.certificate)
 			pify(server.http.close.bind(server.http))().then(() => {
 				server.port = undefined;
 				server.url = undefined;
-			}),
-			pify(server.https.close.bind(server.https))().then(() => {
-				server.sslPort = undefined;
-				server.sslUrl = undefined;
 			})
 		]);
 
