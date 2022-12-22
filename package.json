@@ -67,6 +67,9 @@
 		"xo": "^0.53.1"
 	},
 	"jest": {
+		"collectCoverageFrom": [
+			"src/**/*.{ts,js}"
+		],
 		"extensionsToTreatAsEsm": [
 			".ts"
 		],
