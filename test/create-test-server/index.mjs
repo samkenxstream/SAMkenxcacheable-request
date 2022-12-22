@@ -6,8 +6,7 @@ import express from 'express';
 import pify from 'pify';
 import bodyParser from 'body-parser';
 
-const createTestServer = (opts = {}) => createCert(opts.certificate)
-	.then(keys => {
+const createTestServer = (opts = {}) => {
 		const server = express();
 		server.http = http.createServer(server);
 		
@@ -54,15 +53,6 @@ const createTestServer = (opts = {}) => createCert(opts.certificate)
 		]);
 
 		return server.listen().then(() => server);
-	});
-
-	const createCert = opts => {
-		opts = Object.assign({
-			days: 365,
-			commonName: 'example.com'
-		}, typeof opts === 'string' ? { commonName: opts } : opts);
-	
-		return Promise.resolve();
 	};
 
 export default createTestServer;
