@@ -6,8 +6,6 @@ import https from 'node:https';
 import express from 'express';
 import pify from 'pify';
 import bodyParser from 'body-parser';
-import pem from 'pem';
-import devcert from 'devcert';
 
 const createTestServer = (opts = {}) => createCert(opts.certificate)
 	.then(keys => {
@@ -66,21 +64,6 @@ const createTestServer = (opts = {}) => createCert(opts.certificate)
 		}, typeof opts === 'string' ? { commonName: opts } : opts);
 	
 		return Promise.resolve();
-
-		/*
-		return pify(pem.createCertificate)({
-			days: opts.days,
-			selfSigned: true
-		}).then(caKeys => pify(pem.createCertificate)(Object.assign({
-			serviceCertificate: caKeys.certificate,
-			serviceKey: caKeys.serviceKey,
-			serial: Date.now()
-		}, opts)).then(keys => ({
-			key: keys.clientKey,
-			cert: keys.certificate,
-			caCert: caKeys.certificate
-		})));
-		*/
 	};
 
 export default createTestServer;
