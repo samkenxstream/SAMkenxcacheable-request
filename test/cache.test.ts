@@ -3,11 +3,11 @@ import url from 'node:url';
 import util, {promisify as pm} from 'node:util';
 import {gzip, gunzip} from 'node:zlib';
 import getStream from 'get-stream';
-import createTestServer from 'create-test-server';
 import delay from 'delay';
 import sqlite3 from 'sqlite3';
 import Keyv from 'keyv';
 import CacheableRequest, {CacheValue, onResponse} from '../src/index.js';
+import createTestServer from './create-test-server/index.mjs';
 
 // Promisify cacheableRequest
 const promisify = (cacheableRequest: any) => async (options: any) => new Promise((resolve, reject) => {

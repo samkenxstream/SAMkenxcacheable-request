@@ -2,10 +2,10 @@ import EventEmitter from 'node:events';
 import {request} from 'node:http';
 import stream from 'node:stream';
 import url from 'node:url';
-import createTestServer from 'create-test-server';
 import getStream from 'get-stream';
 import CacheableRequest from '../src/index.js';
 import {CacheError, RequestError} from '../src/types.js';
+import createTestServer from './create-test-server/index.mjs';
 
 let s: any;
 beforeAll(async () => {
