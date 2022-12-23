@@ -33,7 +33,6 @@
 		"compliant"
 	],
 	"dependencies": {
-		"@types/http-cache-semantics": "^4.0.1",
 		"get-stream": "^6.0.1",
 		"http-cache-semantics": "^4.1.0",
 		"keyv": "^4.5.2",
@@ -43,7 +42,7 @@
 	},
 	"devDependencies": {
 		"@keyv/sqlite": "^3.6.4",
-		"@types/create-test-server": "^3.0.1",
+		"@types/http-cache-semantics": "^4.0.1",
 		"@types/delay": "^3.1.0",
 		"@types/get-stream": "^3.0.2",
 		"@types/jest": "^29.2.4",
@@ -51,8 +50,6 @@
 		"@types/responselike": "^1.0.0",
 		"@types/sqlite3": "^3.1.8",
 		"body-parser": "^1.20.1",
-		"create-cert": "^1.0.6",
-		"create-test-server": "3.0.1",
 		"delay": "^5.0.0",
 		"eslint-plugin-jest": "^27.1.7",
 		"express": "^4.18.2",
